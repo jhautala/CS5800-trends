@@ -1,0 +1,124 @@
+\documentclass[12pt,english]{article}
+\usepackage{graphicx}
+\usepackage{placeins}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{enumitem}
+\usepackage{tasks}
+\usepackage{mathtools}
+\usepackage{etoolbox}
+\usepackage{booktabs}
+\usepackage[en-US,useregional]{datetime2}
+\usepackage{esdiff}
+\usepackage{xcolor}
+\usepackage{subcaption}
+\usepackage{tikz}
+\usepackage{tikz-qtree}
+\usepackage{forest}
+\captionsetup{compatibility=false}
+\usepackage{float}
+\usepackage{nicematrix}
+\usepackage[margin=0.67in]{geometry}
+\usepackage{fancyvrb}
+\usepackage{bm}
+\usepackage[auth-sc]{authblk}
+
+\setlength\parindent{1.5em}
+
+% establish some colors (from http://latexcolor.com/)
+\definecolor{amaranth}{rgb}{0.9, 0.17, 0.31}
+\definecolor{brightmaroon}{rgb}{0.76, 0.13, 0.28}
+\definecolor{bured}{rgb}{0.8, 0.0, 0.0}
+\definecolor{burgundy}{rgb}{0.5, 0.0, 0.13}
+\definecolor{burntumber}{rgb}{0.54, 0.2, 0.14}
+\definecolor{cadmiumred}{rgb}{0.89, 0.0, 0.13}
+\definecolor{cardinal}{rgb}{0.77, 0.12, 0.23}
+\definecolor{carmine}{rgb}{0.59, 0.0, 0.09} % nice
+\definecolor{carnelian}{rgb}{0.7, 0.11, 0.11}
+\definecolor{cornellred}{rgb}{0.7, 0.11, 0.11}
+\definecolor{crimsonglory}{rgb}{0.75, 0.0, 0.2}
+\definecolor{darkcandyapplered}{rgb}{0.64, 0.0, 0.0}
+\definecolor{darkred}{rgb}{0.55, 0.0, 0.0}
+
+\definecolor{cadmiumgreen}{rgb}{0.0, 0.42, 0.24}
+\definecolor{ao}{rgb}{0.0, 0.5, 0.0}
+\definecolor{darkpastelgreen}{rgb}{0.01, 0.75, 0.24}
+
+\definecolor{coolgrey}{rgb}{0.55, 0.57, 0.67}
+
+% establish hyphen
+\mathchardef\mhyphen="2D
+
+% establish graphics path
+%\graphicspath{{./figs/}}
+
+% change line spacing for math
+\setlength{\jot}{10pt}
+
+% change font size for verbatim
+\makeatletter
+\patchcmd{\@verbatim}
+	{\verbatim@font}
+	{\verbatim@font\scriptsize}
+	{}{}
+\makeatother
+
+% shrink bullets
+\newlength{\mylen}
+\setbox1=\hbox{$\bullet$}\setbox2=\hbox{\tiny$\bullet$}
+\setlength{\mylen}{\dimexpr0.5\ht1-0.5\ht2}
+
+\newcommand\Myperm[2][^n]{\prescript{#1\mkern-2.5mu}{}P_{#2}}
+\newcommand\Mycomb[2][^n]{\prescript{#1\mkern-0.5mu}{}C_{#2}}
+
+\newenvironment{fixmathspace}{\abovedisplayskip=0pt\abovedisplayshortskip=0pt\belowdisplayskip=0pt\belowdisplayshortskip=0pt\vspace{-\baselineskip}}{}
+
+% \date{\currenttime}
+% \date{\DTMdisplaydate{2021}{09}{28}{2}}
+% \DTMsavetimestamp{creation}{2021-09-28T00:00:00-05:00}
+% \date{\DTMuse{creation}}
+% \date{2021-10-17}
+
+% \DTMsavedate{duedate}{2021-09-28}
+% \date{\DTMusedate{duedate}}
+
+\title{\textbf{Trading Algorithms}\\
+CS5800 Final Project - Proposal
+}
+
+%\author{
+%  Hautala, Jesse\\
+%  \texttt{hautala.j@northeastern.edu}
+%  \and
+%  Howard, Gregory\\
+%  \texttt{greg@howards.org}
+%  \and
+%  MacAvoy, Maxwell\\
+%  \texttt{macavoy.ma@northeastern.edu}
+%  \and
+%  Okara, Chinemeremma\\
+%  \texttt{okara.c@northeastern.edu}
+%}
+\author{Hautala, Jesse \and Howard, Gregory \and MacAvoy, Maxwell \and Okara, Chinemeremma}
+
+\graphicspath{{figs/}}
+
+\begin{document}
+\maketitle
+
+\section*{Context}
+This problem area encompasses one-dimensional time series prediction over a non-stationary dataset (i.e. presumed to include trends and seasonality). Having experience in sound production/recording (mainly music), it is interesting to learn more about one-dimensional time series data because audio channels consist of one-dimensional time series data.
+
+\section*{Question}
+The question we are asking is: ``Are there some simple trading algorithms that perform better or worse when applied to historical stock price data?''
+
+\section*{Scope}
+We intend to analyze performance differences among a set of trading algorithms. We will assess the time/memory performance of applying these algorithms and also the real world outcomes, or financial performance.
+
+\section*{Description}
+We have not yet located a data source, but we have briefly discussed some alternative models (e.g. ARIMA).
+
+%See Figure $\ref{fig:Q1_1-1}$.
+
+\end{document}
