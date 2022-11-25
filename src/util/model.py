@@ -33,7 +33,7 @@ class Model:
         Returns
         -------
         int
-            How many shares to buy (negaive values to sell).
+            How many shares to buy (negative values to sell).
 
         '''
         return 0
