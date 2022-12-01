@@ -45,54 +45,41 @@ time_perf_iter = args.time_performance_iterations
 
 
 # ----- models
+# Randomly buy or sell 1 share each day
 class Random(Model):
-    def __init__(self, budget=default_budget, seed=42):
+    def __init__(self, budget=default_budget, seed=42): # Meaning of life
         super().__init__(budget)
         self.rng = Generator(PCG64(seed))
     
     def decide(self, snapshot):
         return int(np.round(np.clip(self.rng.standard_normal(), -1, 1)))
-
+# Buy 1 share every day until budget has been exceeded
 class OptimisticGreedy(Model):
     '''
     This model just wants to buy one share each day.
     '''
     def decide(self, snapshot):
         return 1
-
+# Buy and hold (using all budget available on day 1)
 class LongHaul(Model):
     def decide(self, snapshot):
         if len(snapshot) == 1:
             return int(self.budget//snapshot[0])
         else:
             return 0
-
+# Half-day momentum strategy
 class BandWagon(Model):
     def decide(self, snapshot):
         if len(snapshot) < 2:
             return 0
         return int(np.sign(snapshot[-1] - snapshot[-2]))
-
+# Half-day reverse momentum strategy
 class ReactiveGreedy(Model):
     def decide(self, snapshot):
         if len(snapshot) < 2:
             return 0
         return int(np.sign(snapshot[-2] - snapshot[-1]))
-
-class MinMax(Model):
-    def decide(self, snapshot):
-        price = snapshot[-1]
-        if price == 214.767181:
-            n = self.budget//price
-            print(f'buying {n} at {price}')
-            return n
-        elif price == 479.220001:
-            n = -self.shares
-            print(f'selling {-n} shares at {price}')
-            return n
-        else:
-            return 0
-
+# Buy a the minimum (using all budget) and sell all at the maximum... if only we had a crystal ball
 class OmniscientMinMax(Model):
     def decide(self, snapshot):
         price = snapshot[-1]
@@ -104,12 +91,31 @@ class OmniscientMinMax(Model):
             return n
         else:
             return 0
-
+# One week reverse momentum strategy
 class BuyTheDip(Model):
     def decide(self, snapshot):
         if len(snapshot) < 10:
             return 0
         return int(np.sign(snapshot[-10] - snapshot[-1]))
+# Buy all every morning, sell all every evening
+class BuyOpenSellClose(Model):
+    def decide(self, snapshot):
+        price = snapshot[-1]
+        if (len(snapshot) % 2) == 0:
+            n = self.budget//price
+        else:
+            n = -self.shares
+        return n
+# Buy all every evening, sell all every morning
+class BuyCloseSellOpen(Model):
+    def decide(self, snapshot):
+        price = snapshot[-1]
+        if (len(snapshot) % 2) == 0:
+            n = -self.shares
+        else:
+            n = self.budget//price
+        return n
+
 
 def evaluate_model(
         data,
@@ -131,6 +137,8 @@ def evaluate_model(
 def main():
     results = []
     for model_type in [
+            BuyOpenSellClose,
+            BuyCloseSellOpen,
             Random,
             OptimisticGreedy,
             BandWagon,
