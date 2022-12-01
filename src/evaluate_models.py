@@ -105,6 +105,11 @@ class OmniscientMinMax(Model):
         else:
             return 0
 
+class BuyTheDip(Model):
+    def decide(self, snapshot):
+        if len(snapshot) < 10:
+            return 0
+        return int(np.sign(snapshot[-10] - snapshot[-1]))
 
 def evaluate_model(
         data,
@@ -132,6 +137,7 @@ def main():
             ReactiveGreedy,
             LongHaul,
             OmniscientMinMax,
+            BuyTheDip
     ]:
         # convert time to milliseconds
         time_perf_ms = None\
