@@ -79,7 +79,7 @@ class OptimisticGreedy(Model):
 class LongHaul(Model):
     def decide(self, snapshot):
         if len(snapshot) == 1:
-            return int(self.budget//snapshot[0])
+            return int(self.balance//snapshot[0])
         else:
             return 0
 
@@ -102,7 +102,7 @@ class OmniscientMinMax(Model):
     def decide(self, snapshot):
         price = snapshot[-1]
         if price == 214.767181:
-            n = self.budget//price
+            n = self.balance//price
             return n
         elif price == 479.220001:
             n = -self.shares
@@ -122,7 +122,7 @@ class BuyOpenSellClose(Model):
     def decide(self, snapshot):
         price = snapshot[-1]
         if (len(snapshot) % 2) == 0:
-            n = self.budget//price
+            n = self.balance//price
         else:
             n = -self.shares
         return n
@@ -134,7 +134,7 @@ class BuyCloseSellOpen(Model):
         if (len(snapshot) % 2) == 0:
             n = -self.shares
         else:
-            n = self.budget//price
+            n = self.balance//price
         return n
 
 # these models were hand-tuned to optimize the rate of buying/selling
