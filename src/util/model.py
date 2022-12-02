@@ -48,9 +48,12 @@ class Model:
     
     def evaluate(self, snapshot):
         x = self.decide(snapshot)                       # Share count to transact
-        # print(f'intend to {"buy" if x >= 0 else "sell"} {abs(x)} shares')
         price = snapshot[-1]                            # Current price is at the end of the list
         cost = x * price                                
+        # print(
+        #     f'intend to {"buy" if x >= 0 else "sell"} {abs(x)} shares '
+        #     f'{"+" if x <= 0 else "-"}{abs(cost):.2f}'
+        # )
         if cost > self.balance:                         # Scenarios where desired purchase is too costly
             # print(f'you can\'t afford that (cost={cost}; balance={self.balance})')
             if self.clip:                               # Buy only what balance allows

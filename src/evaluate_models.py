@@ -67,14 +67,6 @@ class Random(Model):
     def decide(self, snapshot):
         return self.rng.choice([-1, 1])
 
-# Buy 1 share every day until budget has been exceeded
-class OptimisticGreedy(Model):
-    '''
-    This model just wants to buy one share each day.
-    '''
-    def decide(self, snapshot):
-        return 1
-
 # Buy and hold (using all budget available on day 1)
 class LongHaul(Model):
     def decide(self, snapshot):
@@ -82,6 +74,14 @@ class LongHaul(Model):
             return int(self.balance//snapshot[0])
         else:
             return 0
+
+# Buy 1 share every day until budget has been exceeded
+class OptimisticGreedy(Model):
+    '''
+    This model just wants to buy one share each day.
+    '''
+    def decide(self, snapshot):
+        return 1
 
 # Half-day momentum strategy
 class BandWagon(Model):
@@ -97,7 +97,7 @@ class ReactiveGreedy(Model):
             return 0
         return int(np.sign(snapshot[-2] - snapshot[-1]))
 
-# Buy a the minimum (using all budget) and sell all at the maximum... if only we had a crystal ball
+# Buy at the minimum (using all budget) and sell all at the maximum... if only we had a crystal ball
 class OmniscientMinMax(Model):
     def decide(self, snapshot):
         price = snapshot[-1]
