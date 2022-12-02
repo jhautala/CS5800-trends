@@ -15,6 +15,7 @@ import argparse
 # internal
 from util.model import Model, default_budget
 from util.data import one_dim
+from util.std_dev import ReactiveStdDev
 
 
 # ----- arg parsing
@@ -38,7 +39,7 @@ parser.add_argument(
 #     help='option to skip time performance measurement'
 # )
 
-# - args
+# - extract args
 args=parser.parse_args()
 # skip_time_perf = args.skip_time_perf
 time_perf_iter = args.time_performance_iterations
@@ -53,6 +54,7 @@ class Random(Model):
     
     def decide(self, snapshot):
         return int(np.round(np.clip(self.rng.standard_normal(), -1, 1)))
+
 # Buy 1 share every day until budget has been exceeded
 class OptimisticGreedy(Model):
     '''
@@ -60,6 +62,7 @@ class OptimisticGreedy(Model):
     '''
     def decide(self, snapshot):
         return 1
+
 # Buy and hold (using all budget available on day 1)
 class LongHaul(Model):
     def decide(self, snapshot):
@@ -67,18 +70,21 @@ class LongHaul(Model):
             return int(self.budget//snapshot[0])
         else:
             return 0
+
 # Half-day momentum strategy
 class BandWagon(Model):
     def decide(self, snapshot):
         if len(snapshot) < 2:
             return 0
         return int(np.sign(snapshot[-1] - snapshot[-2]))
+
 # Half-day reverse momentum strategy
 class ReactiveGreedy(Model):
     def decide(self, snapshot):
         if len(snapshot) < 2:
             return 0
         return int(np.sign(snapshot[-2] - snapshot[-1]))
+
 # Buy a the minimum (using all budget) and sell all at the maximum... if only we had a crystal ball
 class OmniscientMinMax(Model):
     def decide(self, snapshot):
@@ -91,12 +97,14 @@ class OmniscientMinMax(Model):
             return n
         else:
             return 0
+
 # One week reverse momentum strategy
 class BuyTheDip(Model):
     def decide(self, snapshot):
         if len(snapshot) < 10:
             return 0
         return int(np.sign(snapshot[-10] - snapshot[-1]))
+
 # Buy all every morning, sell all every evening
 class BuyOpenSellClose(Model):
     def decide(self, snapshot):
@@ -106,6 +114,7 @@ class BuyOpenSellClose(Model):
         else:
             n = -self.shares
         return n
+
 # Buy all every evening, sell all every morning
 class BuyCloseSellOpen(Model):
     def decide(self, snapshot):
@@ -116,6 +125,19 @@ class BuyCloseSellOpen(Model):
             n = self.budget//price
         return n
 
+# these models were hand-tuned to optimize the rate of buying/selling
+class ReactiveGreedy_cheat(Model):
+    def decide(self, snapshot):
+        if len(snapshot) < 2:
+            return 0
+        return 42 * int(np.sign(snapshot[-2] - snapshot[-1]))
+
+class ReactiveStdDev_cheat(ReactiveStdDev):
+    def __init__(
+            self,
+            budget=default_budget,
+    ):
+        super().__init__(budget, shares_per_sd=485, window=100)
 
 def evaluate_model(
         data,
@@ -123,12 +145,13 @@ def evaluate_model(
         budget=default_budget,
         skip_perf=False,
 ):
-    model = model_type(budget)
+    n = len(data)
+    model = model_type(budget, run_length=n)
     # # extra local vars for verification
     # start = model.balance
     # curr = start
     # shares = 0
-    for i in range(1, len(data)+1):
+    for i in range(1, n+1):
         model.evaluate(data[:i].copy())
     return model
 
@@ -145,7 +168,10 @@ def main():
             ReactiveGreedy,
             LongHaul,
             OmniscientMinMax,
-            BuyTheDip
+            BuyTheDip,
+            ReactiveStdDev,
+            ReactiveGreedy_cheat,
+            ReactiveStdDev_cheat,
     ]:
         # convert time to milliseconds
         time_perf_ms = None\
@@ -169,8 +195,8 @@ def main():
         [model_name, model, score, time_perf_ms] = results[i]
         print(
             f'\t{model_name}:\n\t\t'
-            f'{model.balance} - {model.budget} + {model.equity} = '
-            f'{"-" if score < 0 else ""}${abs(score):2f}'
+            f'{model.balance:.2f} - {model.budget:.2f} + {model.equity:.2f} = '
+            f'{"-" if score < 0 else ""}${abs(score):.2f}'
         )
     
     if time_perf_iter > 0:

@@ -8,6 +8,7 @@ Created on Wed Nov 23 19:10:28 2022
 
 import pandas as pd
 import numpy as np
+        
 
 # Extract the data
 df = pd.read_csv('data/SPY.csv')\
