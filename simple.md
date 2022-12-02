@@ -12,6 +12,6 @@
 
 ## "Cheat" Models
 
-Since we are only using a single time series, all of our models are indirectly "trained" on "test" data. For some of our simple models, we tried parameterizing them and found optimal parameters by brute force:
+Since we are only using a single time series, all of our models are indirectly "trained" on "test" data (a sort of cheat, that could lead to overfitting => loss of generality). For some of our models, we tried parameterizing them and found optimal parameters by brute force:
 
 * ReactiveGreedy_cheat: This model uses the same logic as ReactiveGreedy (i.e. buying or selling based on negative/positive derivative for last two points, respectively) but instead of simply buying/selling exactly one share for each transaction, we tried using other constants. For example we might always try to buy/sell exactly 10 shares. By brute force we determined that, for this data set and initial budget of $10,000, the optimal number of shares was 42 (but [of course it was](https://news.mit.edu/2019/answer-life-universe-and-everything-sum-three-cubes-mathematics-0910)).
