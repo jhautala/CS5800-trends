@@ -38,19 +38,19 @@ class ReactiveStdDev(Model):
             self,
             budget=default_budget,
             shares_per_sd=300,
+            scale=10,
             window=100,
-            use_mu=False, # False to use diff between curr and prev
     ):
         super().__init__(budget)
         self.initial_budget = budget
         self.shares_per_sd = shares_per_sd
         self.window = window
-        self.use_mu
         self.sum = 0
         self.sumSq = 0
         self.count = 0
         self.mu = None
         self.sd = None
+        self.scale = scale
         
         # tmp
         self.min = None
@@ -62,8 +62,8 @@ class ReactiveStdDev(Model):
         self.zs = []
         self.sd_diffs = []
         self.costs = []
-        self.xx = []
         self.pp = []
+        self.sigma_mus = []
     
     def decide(self, snapshot):
         price = snapshot[-1]
@@ -110,26 +110,32 @@ class ReactiveStdDev(Model):
             sd_diff = (snapshot[-1] - snapshot[-2])/self.sd
             self.sd_diffs.append(sd_diff)
             
+            # incorporate uncertainty around estimated mu?
+            sigma_mu = self.sd/np.sqrt(n)
+            self.sigma_mus.append(sigma_mu)
+            
             # decide
             if self.shares_per_sd is not None:
                 x = -int(sd_diff * self.shares_per_sd)
             else:
-                # incorporate uncertainty around mu?
-                # sigma_mu = self.sd/np.sqrt(n)
                 cen = 2 * (p - .5)
                 if cen < 0:
                     # NOTE: using p here like this is more
                     #       like tanh, but we might want something
                     #       more like sinh...
                     ceil = self.balance/price
-                    x = -int(cen * ceil)
+                    x = -int(self.scale * ceil * cen)
                 else:
                     floor = self.shares
-                    x = int(cen * floor)
+                    x = -int(self.scale * floor * cen)
         else:
             x = 0
         
-        self.xx.append(x)
+        cost = price * x
+        if cost > self.balance:
+            cost = self.balance if self.clip else 0
+        elif x < -self.shares:
+            x = -self.shares if self.clip else 0
         self.costs.append(price * x)
         return x
 
@@ -178,215 +184,164 @@ class AgressiveEarly(Model):
         else:
             return 0
 
+alt_mid = {
+    k: 0 for k in ['decision shares', 'decision costs', 'z-scores']
+}
+alt_mid['norm probs'] = .5
+incl_detail = set(['decision shares', 'decision costs'])
 
-def main():
-    # ----- find best params for StdDevReactive
-    results = []
-    shares_per_sds = np.linspace(5,500)
-    windows = np.arange(2,500)
-    params = []
-    for shares_per_sd in shares_per_sds:
-        for window in windows:
-            model = ReactiveStdDev(
-                shares_per_sd=shares_per_sd,
-                window=window,
-            )
-            for i in range(1, len(one_dim)+1):
-                model.evaluate(one_dim[:i].copy())
-            
-            params.append({
-                'window': window,
-                'shares_per_sd': shares_per_sd,
-            })
-            results.append([
-                window,
-                shares_per_sd,
-                model.get_value(),
-            ])
-    r_df = pd.DataFrame(
-        results,
-        columns=['window', 'shares', 'profit'],
-    )
-    
-    # tmp = ReactiveStdDev(
-    #     shares_per_sd=5,
-    #     window=100,
-    # )
-    # for i in range(1, len(one_dim)+1):
-    #     tmp.evaluate(one_dim[:i].copy())
-    
-    # dir(tmp)
-    # tmp.get_value()
-    # vars(tmp)
-    # attrs = set(dir(ReactiveStdDev)) - set(dir(tmp))
-    # [a for a in attrs if not a.startswith('__') and not callable(getattr(obj, a))]
-    # pp = []
-    # for p in params:
-    #     kk = list(p.keys())
-    #     pp.append({
-    #         'shares_per_sd': p.get(kk[0]),
-    #         'window': int(p.get(kk[0])) if len(kk) == 1 else p.get(kk[1]),
-    #     })
-    
-    r_df['window_per_share'] = r_df['window']/r_df['shares']
-    # r_df\
-    #     .drop(columns=['window_per_share'])\
-    #     .to_csv('std_dev_params.csv', index=False)
-    
-    sns.pairplot(r_df)
-    sns.scatterplot(
-        r_df[r_df['window'] < 50],
-        x='window',
-        y='shares',
-        hue='profit',
-    )
-    10000./one_dim[0]
-    ss = sorted(r_df['shares'].unique())
-    for shares in ss[30:40]:
-        ax = sns.jointplot(
-            r_df[r_df['shares'] == shares],
-            # r_df,
-            x='window',
-            y='profit',
-            # hue='window',
-            # kind='hist',
-            # alpha='.2'
-        )
-        plt.title(f'shares: {shares:.2f}')
-        plt.tight_layout()
-        plt.show()
-    ww = sorted(r_df['window'].unique())
-    for window in ww[10:20]:
-        ax = sns.jointplot(
-            r_df[r_df['window'] == window],
-            # r_df,
-            x='shares',
-            y='profit',
-            # hue='window',
-            # kind='hist',
-            # alpha='.2'
-        )
-        plt.title(f'window: {window:.2f}')
-        plt.tight_layout()
-        plt.show()
-    
-    # # min: [15, 489.8979591836735, -9909.054751000001]
-    # # max: [5, 500.0, 377137.9390860005]
-    # results[24405]
-    # params[23917]
-    # tmp = np.array(results)[:,2]
-    # np.argmax(tmp)
-    # tmp[23917]
-    
-    # # ----- scatter with alpha
-    # def scatter(x, y, color, alphas, **kwarg):
-    #     r, g, b, _ = to_rgba(color)
-    #     color = [(r, g, b, alpha) for alpha in alphas]
-    #     plt.scatter(x, y, c=color, **kwarg)
-    
-    # # results = np.array(results)
-    # # x = results[:,0]
-    # # y = results[:,1]
-    # # alphas = results[:,2]
-    # r_df = pd.read_csv('std_dev_params.csv')
-    # x = r_df['window']
-    # y = r_df['shares']
-    # span = r_df['profit'].max() - r_df['profit'].min()
-    # alphas = (r_df['profit'] - r_df['profit'].min())/span
-    # scatter(x, y, 'tab:blue', alphas, s=10)
-
-    # ----- find best params for GreedyReactive
-    # for i in range(1000):
-    #     # model = ReactiveGreedy(shares_per=i)
-    #     # model = ReactiveStdDev(shares_per_sd=1. * i)
-    #     for i in range(1, len(one_dim)+1):
-    #         model.evaluate(one_dim[:i].copy())
-    #     value = model.get_value()
-    #     results.append(value)
-    
-    results = np.array(results)
-    np.argmax(results)
-    # fig, ax1 = plt.subplots()
-    # ax1.plot(
-    #     list(range(1000)),
-    #     results,
-    # )
+def plot(
+        desc,
+        model,
+        mid=None,
+        alt='decision shares',
+        save_fig=False,
+):  
+    if alt == 'decision shares':
+        second = np.array(model.trades)[1:]
+    elif alt == 'decision costs':
+        second = np.array(model.costs)[1:]
+    elif alt == 'z-scores':
+        second = np.array(model.zs) # looks like a good input to decisions...
+    elif alt == 'norm probs':
+        second = norm.cdf(np.array(model.zs))
+    elif alt == 'std devs':
+        second = np.array(model.sds)
+    elif alt == 'sigma_mus':
+        second = np.array(model.sigma_mus)
+    else:
+        raise Exception(f'Invalid alt keyword "{alt}"')
     
     
-    # model = ReactiveStdDev(shares_per_sd=485) # works well with window 100
-    model = ReactiveStdDev(shares_per_sd=485)
-    for i in range(1, len(one_dim)+1):
-        model.evaluate(one_dim[:i].copy())
-    print(f'financial performance: {model.get_value()}')
-    if not hasattr(model, 'sds'):
-        return
     
-    minx = None
-    maxx = None
-    for i, d in enumerate(one_dim):
-        if model.min == d:
-            minx = i
-        if model.max == d:
-            maxx = i
-    
-    mid = np.array(model.mus)[1:]
-    sds = np.array(model.sds)
-    z_scores = np.array(model.zs)
-    sd_diffs = np.array(model.sd_diffs)
-    pp = norm.cdf(z_scores)
-    
-    one_dim[0]
-    p = 10000*z_scores.mean()
-    485/p
-    
-    
-    yy = one_dim[1:]
     xx = range(len(one_dim)-1)
-    train_color = 'tab:orange'
-    test_color = 'tab:blue'
+    prices = one_dim[1:]
+    price_color = 'tab:blue'
+    alt_color = 'tab:orange'
     
-    fig, ax1 = plt.subplots()
     
-    # # +/- 1 sd
-    # ax1.fill_between(
-    #     xx,
-    #     mid + sds,
-    #     mid - sds,
-    #     alpha=0.2,
-    #     color=test_color
-    # )
-    # ax1.plot(xx, mid + sds, '--', color=test_color, label='$\pm$1 std dev')
-    # ax1.plot(xx, mid - sds, '--', color=test_color)
+    fig, ax1 = plt.subplots(
+        figsize=(12, 6),
+        sharex=True,
+    )
+    ax1.set_xlabel('Day')
     
-    # # price
+    # plot mid +/- 1 sd
+    if mid is not None:
+        sds = np.array(model.sds)
+        if mid == 'mu':
+            mid = np.array(model.mus)[1:]
+        else:
+            mid = one_dim[1:]
+        ax1.fill_between(
+            xx,
+            mid + sds,
+            mid - sds,
+            alpha=0.2,
+            color=price_color
+        )
+        ax1.plot(xx, mid + sds, '--', color=price_color, label='$\pm$1 std dev')
+        ax1.plot(xx, mid - sds, '--', color=price_color)
+    
+    # plot price
     ax1.plot(
         xx,
-        yy,
-        c = 'tab:blue',
+        prices,
+        c=price_color,
         alpha=.5,
     )
     
-    # # min/max
+    # plot min/max
     # ax1.axvline(maxx, linestyle="--", color=".5", label='best time to sell')
     # ax1.axhline(model.max, linestyle="--", color=".5")
     # ax1.axvline(minx, linestyle="--", color=".5", label='best time to buy')
     # ax1.axhline(model.min, linestyle="--", color=".5")
     
-    ax1.set_ylabel('Price')
-    ax1.set_xlabel('Day')
-    # ax1.legend()
-    ax1 = ax1.twinx()
-    ax1.axhline(0, linestyle="--", color=".5")
-    ax1.plot(
+    ax1.set_xlabel('day')
+    ax1.set_ylabel('price')
+    ax1.spines['left'].set_color(price_color)
+    ax1.yaxis.label.set_color(price_color)
+    ax1.tick_params(
+        axis='y',
+        which='both',
+        color=price_color,
+        labelcolor=price_color,
+    )
+    
+    # plot secondary axis
+    ax2 = ax1.twinx()
+    if hasattr(alt_mid, alt):
+        ax2.axhline(alt_mid.get(alt), linestyle="--", color=".5")
+    ax2.plot(
         xx,
-        z_scores,
-        color=train_color,
+        second,
+        color=alt_color,
         alpha=.5
     )
-    ax1.set_ylabel('Smoothed')
-    # ax2.legend()
+    ax2.set_ylabel(alt)
+    ax2.spines['right'].set_color(alt_color)
+    ax2.yaxis.label.set_color(alt_color)
+    ax2.tick_params(
+        axis='y',
+        which='both',
+        color=alt_color,
+        labelcolor=alt_color,
+    )
+    
+    # add title
+    model_params = [
+        f'budget={model.budget}',
+        f'window={model.window}',
+    ]
+    if model.shares_per_sd is not None:
+        model_params.append(f'shares_per_sd={model.shares_per_sd}')
+    else:
+        model_params.append(f'scale={model.scale}')
+    model_name = type(model).__name__
+    net_perf = model.get_value() - model.budget
+    net_perf = f'{"-" if net_perf < 0 else ""}${abs(net_perf):.2f}'
+    title = [
+        f'{model_name} price vs {alt}',
+    ]
+    if alt in incl_detail:
+        title.extend([
+            f'params: {"; ".join(model_params)}',
+            f'Net Fincancial Performance: {net_perf}',
+        ])
+        
+    plt.title(' \n '.join(title))
+    
     plt.tight_layout()
+    if save_fig:
+        plt.savefig(
+            f'figs/std_dev_{desc}_price_vs_{alt}.png',
+            dpi=300,
+            bbox_inches='tight'
+        )
     plt.show()
+
+def run_model(desc, model, save_fig=False):
+    for i in range(1, len(one_dim)+1):
+        model.evaluate(one_dim[:i].copy())
+    print(f'financial performance: {model.get_value()}')
+
+    plot(desc, model, alt='std devs', save_fig=save_fig)
+    plot(desc, model, alt='z-scores', save_fig=save_fig)
+    # plot(desc, model, alt='norm probs', save_fig=save_fig)
+    plot(desc, model, save_fig=save_fig)
+    plot(desc, model, alt='decision costs', save_fig=save_fig)
+    # plot(desc, model, alt='sigma_mus', save_fig=save_fig)
+    
+
+def main():
+    save_fig = True
+    run_model('cheat', ReactiveStdDev(shares_per_sd=485), save_fig=save_fig)
+    run_model('norm', ReactiveStdDev(shares_per_sd=None), save_fig=save_fig)
+    
+    
+    # one_dim[0]
+    # p = 10000*z_scores.mean()
+    # 485/p
 
 if __name__ == "__main__":
     main()

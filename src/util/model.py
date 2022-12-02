@@ -22,15 +22,14 @@ class Model:
             self,
             budget=default_budget,
             clip=True,
-            run_length=None,
     ):
         self.balance = self.budget = budget     # Balance == budget at the start
         self.shares = 0                         # Start with no shares
         self.clip = clip                        # False to noop on impossible transactions
-        self.run_length = run_length
         self.equity = 0
         self.volume = 0
         self.volume_shares = 0
+        self.trades = []
     
     def decide(self, snapshot):
         '''
@@ -71,6 +70,7 @@ class Model:
         self.equity = self.shares * price               # Update valuation of equity
         self.volume += abs(cost)                        # Update total volume traded
         self.volume_shares += abs(x)                    # Update total count of shares traded
+        self.trades.append(x)
         return x
     
     def get_value(self):

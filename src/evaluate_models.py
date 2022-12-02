@@ -6,11 +6,13 @@ Created on Thu Nov 24 23:39:39 2022
 @author: jhautala
 """
 
-import numpy as np
-from numpy.random import Generator, PCG64
+import argparse
 import timeit
 import tracemalloc
-import argparse
+import numpy as np
+from numpy.random import Generator, PCG64
+import matplotlib.pyplot as plt
+plt.ioff() # disable interactive plotting
 
 # internal
 from util.model import Model, default_budget
@@ -31,24 +33,34 @@ parser.add_argument(
     default=0,
     help='iterations per model for measuring time performance'
 )
-# parser.add_argument(
-#     '--skip-time-perf',
-#     metavar='',
-#     type=bool,
-#     default=False,
-#     help='option to skip time performance measurement'
-# )
+parser.add_argument(
+    '--include-plots',
+    type=bool,
+    default=False,
+    help='option to display plots of prices vs decisions'
+)
+parser.add_argument(
+    '--save-figs',
+    type=bool,
+    default=False,
+    help='option to save plots of prices vs decisions'
+)
 
 # - extract args
 args=parser.parse_args()
-# skip_time_perf = args.skip_time_perf
 time_perf_iter = args.time_performance_iterations
+include_plots = args.include_plots
+save_figs = args.save_figs
 
 
 # ----- models
 # Randomly buy or sell 1 share each day
 class Random(Model):
-    def __init__(self, budget=default_budget, seed=42): # Meaning of life
+    def __init__(
+            self,
+            budget=default_budget,
+            seed=42, # Meaning of life
+    ):
         super().__init__(budget)
         self.rng = Generator(PCG64(seed))
     
@@ -146,8 +158,8 @@ def evaluate_model(
         skip_perf=False,
 ):
     n = len(data)
-    model = model_type(budget, run_length=n)
-    # # extra local vars for verification
+    model = model_type(budget)
+    # TODO: use local vars for verification?
     # start = model.balance
     # curr = start
     # shares = 0
@@ -155,9 +167,91 @@ def evaluate_model(
         model.evaluate(data[:i].copy())
     return model
 
+def plot_decisions(
+        model,
+        time_perf_ms=None,
+        show_plot=False,
+        save_fig=False,
+):
+    xx = range(len(one_dim))
+    
+    price_color = 'tab:blue'
+    trade_color = 'tab:orange'
+
+    fig, ax1 = plt.subplots(
+        figsize=(12, 6),
+        sharex=True,
+    )
+    ax1.set_xlabel('Day')
+    
+    # plot price
+    ax1.plot(
+        xx,
+        one_dim,
+        c=price_color,
+        alpha=.5,
+    )
+    ax1.set_ylabel('Price')
+    ax1.yaxis.label.set_color(price_color)
+    ax1.spines['left'].set_color(price_color)
+    ax1.tick_params(
+        axis='y',
+        which='both',
+        color=price_color,
+        labelcolor=price_color,
+    )
+    
+    # plot decisions
+    ax2 = ax1.twinx()
+    ax2.axhline(0, linestyle="--", color=".5")
+    ax2.plot(
+        xx,
+        model.trades,
+        color=trade_color,
+        alpha=.5,
+        linestyle='',
+        marker='.',
+    )
+    ax2.set_ylabel('Decisions')
+    ax2.spines['right'].set_color(trade_color)
+    ax2.yaxis.label.set_color(trade_color)
+    ax2.tick_params(
+        axis='y',
+        which='both',
+        color=trade_color,
+        labelcolor=trade_color,
+    )
+    
+    # add title
+    model_name = type(model).__name__
+    net_perf = model.get_value() - model.budget
+    net_perf = f'{"-" if net_perf < 0 else ""}${abs(net_perf):.2f}'
+    title = [
+        f'{model_name} Price vs Decisions',
+        f'Net Fincancial Performance: {net_perf}',
+    ]
+    if time_perf_ms is not None:
+        title.append(f'Time Performance: {time_perf_ms:.3f} ms')
+    plt.title(' \n '.join(title))
+    
+    plt.tight_layout()
+    if save_fig:
+        plt.savefig(
+            f'figs/price_vs_decisions_{model_name}.png',
+            dpi=300,
+            bbox_inches='tight'
+        )
+    if show_plot:
+        plt.show()
+    else:
+        plt.close(fig)
 
 # ----- main execution
 def main():
+    # # TODO delete these argument override
+    # include_plots = True
+    # save_figs = True
+    
     results = []
     for model_type in [
             BuyOpenSellClose,
@@ -173,7 +267,10 @@ def main():
             ReactiveGreedy_cheat,
             ReactiveStdDev_cheat,
     ]:
-        # convert time to milliseconds
+        model_name = model_type.__name__
+        # print(f'trying {model_name}')
+        
+        # timeit*1000 to convert time to milliseconds
         time_perf_ms = None\
             if time_perf_iter == 0\
             else timeit.timeit(
@@ -182,11 +279,18 @@ def main():
                 )*1000/time_perf_iter
         model = evaluate_model(one_dim, model_type)
         results.append([
-            model_type.__name__,
+            model_name,
             model,
             model.get_value(),
             time_perf_ms,
         ])
+        if include_plots:
+            plot_decisions(
+                model,
+                time_perf_ms=time_perf_ms,
+                show_plot=True,
+                save_fig=save_figs,
+            )
     
     results = np.array(results)
     
