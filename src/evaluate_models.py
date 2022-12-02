@@ -65,7 +65,7 @@ class Random(Model):
         self.rng = Generator(PCG64(seed))
     
     def decide(self, snapshot):
-        return int(np.round(np.clip(self.rng.standard_normal(), -1, 1)))
+        return self.rng.choice([-1, 1])
 
 # Buy 1 share every day until budget has been exceeded
 class OptimisticGreedy(Model):
