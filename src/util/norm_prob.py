@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Fri Nov 25 00:46:00 2022
+Created on Fri Dec  2 20:59:36 2022
 
 @author: jhautala
 """
 
 
 import numpy as np
+from scipy.stats import norm
 
 # internal
 from util.model import Model, default_budget
@@ -16,17 +17,17 @@ class ReactiveStdDev(Model):
     def __init__(
             self,
             budget=default_budget,
-            shares_per_sd=300,
+            scale=10,
             window=100,
     ):
         super().__init__(budget)
-        self.shares_per_sd = shares_per_sd
         self.window = window
         self.sum = 0
         self.sumSq = 0
         self.count = 0
         self.mu = None
         self.sd = None
+        self.scale = scale
     
     def decide(self, snapshot):
         price = snapshot[-1]
@@ -50,11 +51,23 @@ class ReactiveStdDev(Model):
                 self.sumSq/(self.count-1) - self.mu**2/(self.count**2-self.count)
             )
             
-            # calculate num std devs from prior point
-            sd_diff = (snapshot[-1] - snapshot[-2])/self.sd
+            # calculate z score
+            z = (price - self.mu)/self.sd
+            
+            # calculate probability
+            p = norm.cdf(z)
             
             # decide
-            x = -int(sd_diff * self.shares_per_sd)
+            cen = 2 * (p - .5)
+            if cen < 0:
+                # NOTE: using p here like this is more
+                #       like tanh, but we might want something
+                #       more like sinh...
+                ceil = self.balance/price
+                x = -int(self.scale * ceil * cen)
+            else:
+                floor = self.shares
+                x = -int(self.scale * floor * cen)
         else:
             x = 0
         

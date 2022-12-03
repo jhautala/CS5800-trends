@@ -182,7 +182,7 @@ def plot_decisions(
     fig, [ax1, ax3] = plt.subplots(
         nrows=2,
         ncols=1,
-        figsize=(12, 10),
+        figsize=(12, 8),
         sharex=True,
     )
     
@@ -201,6 +201,13 @@ def plot_decisions(
         which='both',
         color=price_color,
         labelcolor=price_color,
+    )
+    ax1.tick_params(
+        axis='x',          # changes apply to the x-axis
+        which='both',      # both major and minor ticks are affected
+        bottom=False,      # ticks along the bottom edge are off
+        top=False,         # ticks along the top edge are off
+        labelbottom=False  # labels along the bottom edge are off
     )
     
     # ----- plot decisions
@@ -262,7 +269,7 @@ def plot_decisions(
 # ----- main execution
 def main():
     # TODO delete these argument override
-    include_plots = True
+    # include_plots = True
     # save_figs = True
     
     results = []

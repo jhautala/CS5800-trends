@@ -1,6 +1,9 @@
 # Mac OS
 .DS_Store
 
+# VS Code
+.vscode/
+
 # Python
 __pycache__/
 
@@ -30,3 +33,6 @@ __pycache__/
 *.synctex.gz
 *.fdb_latexmk
 *.fls
+
+# Spyder
+.spyproject/
