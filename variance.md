@@ -1,6 +1,6 @@
 ## Variance-based Models
 
-We thought it might be worthwhile to calculate sample statistics for each snapshot. If we want to use the sample mean we might consider that the data is non-stationary and liable to trend, so we might want to apply a sliding window to limit the influence of older data. For simplicity, the initial model takes a single `window` parameter to configure the number of points to include in sample stats calculations.
+We thought it might be worthwhile to calculate sample statistics for each snapshot. If we want to use the sample mean we might consider that the data is non-stationary and liable to trend, so we might want to apply a sliding window to limit the influence of older data. For simplicity, the initial model takes a single `window` parameter to configure the number of points to include in sample stats calculations. Since each sample is a strict subset of each subsequent sample, we record sufficient statistics for the sliding window instead of recalculating everything for each iteration. This is similar to the rolling hash used in the Rabin-Karp subtring matching algorithm.
 
 ### Scaled by Standard Deviation
 
