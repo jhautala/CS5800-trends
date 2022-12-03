@@ -9,6 +9,7 @@ Created on Thu Nov 24 23:39:39 2022
 import argparse
 import timeit
 import tracemalloc
+import math
 import numpy as np
 from numpy.random import Generator, PCG64
 import matplotlib.pyplot as plt
@@ -176,15 +177,16 @@ def plot_decisions(
     xx = range(len(one_dim))
     
     price_color = 'tab:blue'
-    trade_color = 'tab:orange'
+    value_color = 'tab:orange'
 
-    fig, ax1 = plt.subplots(
-        figsize=(12, 6),
+    fig, [ax1, ax3] = plt.subplots(
+        nrows=2,
+        ncols=1,
+        figsize=(12, 10),
         sharex=True,
     )
-    ax1.set_xlabel('Day')
     
-    # plot price
+    # ----- plot price
     ax1.plot(
         xx,
         one_dim,
@@ -201,39 +203,50 @@ def plot_decisions(
         labelcolor=price_color,
     )
     
-    # plot decisions
+    # ----- plot decisions
     ax2 = ax1.twinx()
     ax2.axhline(0, linestyle="--", color=".5")
     ax2.plot(
         xx,
         model.trades,
-        color=trade_color,
+        color=value_color,
         alpha=.5,
         linestyle='',
         marker='.',
     )
     ax2.set_ylabel('Decisions')
-    ax2.spines['right'].set_color(trade_color)
-    ax2.yaxis.label.set_color(trade_color)
+    ax2.spines['right'].set_color(value_color)
+    ax2.yaxis.label.set_color(value_color)
     ax2.tick_params(
         axis='y',
         which='both',
-        color=trade_color,
-        labelcolor=trade_color,
+        color=value_color,
+        labelcolor=value_color,
     )
     
     # add title
     model_name = type(model).__name__
-    net_perf = model.get_value() - model.budget
+    net_perf = model.get_net_value()
     net_perf = f'{"-" if net_perf < 0 else ""}${abs(net_perf):.2f}'
     title = [
-        f'{model_name} Price vs Decisions',
-        f'Net Fincancial Performance: {net_perf}',
+        f'{model_name} model - Prices and Decisions',
+        f'Net Financial Performance: {net_perf}',
     ]
     if time_perf_ms is not None:
         title.append(f'Time Performance: {time_perf_ms:.3f} ms')
     plt.title(' \n '.join(title))
     
+    # ----- plot net value
+    ax3.plot(
+        xx,
+        model.net_values,
+        color='black',
+    )
+    ax3.set_xlabel('Time')
+    ax3.set_ylabel('Net Value')
+    
+    
+    # ----- render and save
     plt.tight_layout()
     if save_fig:
         plt.savefig(
@@ -248,8 +261,8 @@ def plot_decisions(
 
 # ----- main execution
 def main():
-    # # TODO delete these argument override
-    # include_plots = True
+    # TODO delete these argument override
+    include_plots = True
     # save_figs = True
     
     results = []
@@ -281,7 +294,7 @@ def main():
         results.append([
             model_name,
             model,
-            model.get_value(),
+            model.get_net_value(),
             time_perf_ms,
         ])
         if include_plots:
