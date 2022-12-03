@@ -4,7 +4,7 @@
 
 <img src="figs/price_vs_decisions_Random.png" width=900>
 
-* LongHaul: buy as many shares a possible on the first iteration and never sells
+* LongHaul: buy as many shares a possible on the first iteration and never sell
 
 <img src="figs/price_vs_decisions_LongHaul.png" width=900>
 
@@ -16,7 +16,7 @@
 
 <img src="figs/price_vs_decisions_BandWagon.png" width=900>
 
-* ReactiveGreedy: the opposite of the BandWagon model
+* ReactiveGreedy: the opposite of the BandWagon model; buy if current is greater than previous, etc.
 
 <img src="figs/price_vs_decisions_ReactiveGreedy.png" width=900>
 
