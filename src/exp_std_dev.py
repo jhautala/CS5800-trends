@@ -9,6 +9,7 @@ Created on Fri Dec  2 19:39:06 2022
 import numpy as np
 from scipy.stats import norm
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 
 # internal
 from util.data import one_dim
@@ -26,6 +27,7 @@ alt_mid = {
 }
 alt_mid['norm probs'] = .5
 incl_detail = set(['decision shares', 'decision costs'])
+alt_int = set(['decision shares'])
 
 def plot(
         desc,
@@ -139,6 +141,8 @@ def plot(
         color=alt_color,
         labelcolor=alt_color,
     )
+    if alt in alt_int:
+        ax2.yaxis.set_major_locator(MaxNLocator(integer=True))
     
     # add title
     model_params = [
@@ -215,7 +219,7 @@ def run_model(desc, model, save_fig=False):
     # plt.plot(tmp2)
     # plt.show()
 def main():
-    save_fig = True
+    save_fig = False
     
     # best model...
     # tmp = BuyOpenSellClose()
@@ -237,7 +241,7 @@ def main():
     # model = StdDevDetail(scale='max')
     # run_model('sd_diffs_minmax', model, save_fig=save_fig)
     
-    model = StdDevDetail(mode='prob', scale=1)
+    model = StdDevDetail(mode='prob')
     run_model('norm', model, save_fig=save_fig)
     
     # model = StdDevDetail(mode='prob', scale=600)
