@@ -13,6 +13,7 @@ import math
 import numpy as np
 from numpy.random import Generator, PCG64
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 plt.ioff() # disable interactive plotting
 
 # internal
@@ -233,6 +234,7 @@ def plot_decisions(
         color=value_color,
         labelcolor=value_color,
     )
+    ax2.yaxis.set_major_locator(MaxNLocator(integer=True))
     
     # add title
     model_name = type(model).__name__
