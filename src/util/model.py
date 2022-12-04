@@ -48,8 +48,8 @@ class Model:
         self.net_values.append(self.get_net_value())
         
         # Share count to transact
-        x = self.decide(snapshot)
-        
+        x = int(self.decide(snapshot))
+
         # Current price is at the end of the list
         price = snapshot[-1]
         cost = x * price

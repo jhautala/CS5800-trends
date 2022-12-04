@@ -16,11 +16,11 @@ class ReactiveStdDev(Model):
     def __init__(
             self,
             budget=default_budget,
-            shares_per_sd=300,
+            scale=300,
             window=100,
     ):
         super().__init__(budget)
-        self.shares_per_sd = shares_per_sd
+        self.scale = scale
         self.window = window
         self.sum = 0
         self.sumSq = 0
@@ -53,16 +53,7 @@ class ReactiveStdDev(Model):
             # calculate num std devs from prior point
             sd_diff = (snapshot[-1] - snapshot[-2])/self.sd
             
-            # decide
-            x = -int(sd_diff * self.shares_per_sd)
+            return -int(sd_diff * self.scale)
         else:
-            x = 0
-        
-        cost = price * x
-        if cost > self.balance:
-            x = int(self.balance//price)
-            cost = price * x
-        elif x < -self.shares:
-            x = -self.shares
-            cost = price * x
-        return x
+            # not enough information to make a decision yet
+            return 0

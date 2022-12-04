@@ -18,7 +18,7 @@ class StdDevDetail(Model):
             self,
             budget=default_budget,
             mode='sd_diff',
-            scale=10,
+            scale=1,
             window=100,
     ):
         super().__init__(budget)

@@ -228,8 +228,8 @@ def main():
     # wtf! this does better than previous brute force calculation...
     # model = StdDevDetail(scale=2089983722656843.0)
     
-    # model = StdDevDetail()
-    # run_model('sd_diffs', model, save_fig=save_fig)
+    model = StdDevDetail()
+    run_model('sd_diffs', model, save_fig=save_fig)
     
     model = StdDevDetail(scale=68.6)
     run_model('sd_diffs_cheat', model, save_fig=save_fig)
@@ -237,7 +237,7 @@ def main():
     # model = StdDevDetail(scale='max')
     # run_model('sd_diffs_minmax', model, save_fig=save_fig)
     
-    model = StdDevDetail(mode='prob')
+    model = StdDevDetail(mode='prob', scale=1)
     run_model('norm', model, save_fig=save_fig)
     
     # model = StdDevDetail(mode='prob', scale=600)

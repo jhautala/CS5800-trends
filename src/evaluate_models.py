@@ -153,7 +153,7 @@ class ReactiveStdDev_cheat(ReactiveStdDev):
             self,
             budget=default_budget,
     ):
-        super().__init__(budget, shares_per_sd=1.454, window=100)
+        super().__init__(budget, scale=68.6)
 
 def evaluate_model(
         data,
