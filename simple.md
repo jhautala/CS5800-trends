@@ -16,15 +16,24 @@
 
 <img src="figs/price_vs_decisions_BuyCloseSellOpen.png" width=900>
 
-* BandWagon - This is a "Momentum" based model: Buy one share if the current price is greater than the previous, sell one if less, and do nothing if equal.
+* BandWagon - This is a "Momentum" based model, based on the last two points:
+  * Buy one share if the current price is greater than the previous
+  * Sell one if less
+  * Do nothing if equal
 
 <img src="figs/price_vs_decisions_BandWagon.png" width=900>
 
-* ReactiveGreedy - This is a "Reverse Momentum" model using just the last two points. the opposite of the BandWagon model; buy if current is greater than previous, etc.
+* ReactiveGreedy - This is an immediate "Reverse Momentum" model (i.e. the opposite of the BandWagon model):
+  * Buy if current price is less than previous
+  * Sell if current is greater than previous
+  * Do nothing if last two prices are equal
 
 <img src="figs/price_vs_decisions_ReactiveGreedy.png" width=900>
 
-* BuyTheDip - This is another "Reverse Momentum" model, using a ten point interval. If the current price is lower than the price nine points previously, it will buy a share; if it's higher it will sell a share; and if it's equal it will do nothing.
+* BuyTheDip - This is another "Reverse Momentum" model, using a ten point lag:
+  * If the current price is lower than the price nine points previously, buy a share
+  * If it's higher, sell a share
+  * If it's equal it will do nothing
 
 <img src="figs/price_vs_decisions_BuyTheDip.png" width=900>
 
@@ -38,7 +47,7 @@
 
 ## "Cheat" Models
 
-Since we are only using a single time series, all of our models are indirectly "trained" on "test" data (i.e. any manual adjustments to improve performance are tainted by prescience, a sort of cheat, that could lead to overfitting => loss of generality). For some of our models, we tried parameterizing them and scanning the parameter space for optimal parameters:
+Since we are only working with a single time series, all of our models are indirectly "trained" on "test" data (i.e. any manual adjustments to improve performance are tainted by prescience, a sort of cheat, that could lead to overfitting => loss of generality). For some of our models, we tried parameterizing them and scanning the parameter space for optimal parameters:
 
 * ReactiveGreedy_cheat: This model uses the same logic as ReactiveGreedy (i.e. buying or selling based on negative/positive slope for last two points, respectively) but instead of simply buying/selling exactly one share for each transaction, we tried using other constants. For example we might always try to buy/sell exactly 10 shares. By brute force we determined that, for this data set and initial budget of $10,000, the optimal number of shares was 18, yielding ~43% net value USD over ~3.5 years.
 
