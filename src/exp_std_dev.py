@@ -238,6 +238,9 @@ def main():
     model = StdDevDetail(scale=68.6)
     run_model('sd_diffs_cheat', model, save_fig=save_fig)
     
+    model = StdDevDetail(scale=68.6, conserve=True)
+    run_model('sd_diffs_conserve', model, save_fig=save_fig)
+    
     # model = StdDevDetail(scale='max')
     # run_model('sd_diffs_minmax', model, save_fig=save_fig)
     

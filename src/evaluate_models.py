@@ -18,7 +18,7 @@ plt.ioff() # disable interactive plotting
 
 # internal
 from util.model import Model, default_budget
-from util.data import one_dim
+from util.data import one_dim, df_w_dates
 from util.std_dev import ReactiveStdDev
 from util.revmo import ReverseMomentum
 
@@ -178,7 +178,7 @@ def plot_decisions(
         show_plot=False,
         save_fig=False,
 ):
-    xx = range(len(one_dim))
+    xx = df_w_dates.index.values
     
     price_color = 'tab:blue'
     value_color = 'tab:orange'
