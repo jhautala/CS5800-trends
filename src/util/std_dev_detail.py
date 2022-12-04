@@ -17,21 +17,23 @@ class StdDevDetail(Model):
     def __init__(
             self,
             budget=default_budget,
-            shares_per_sd=300,
+            mode='sd_diff',
             scale=10,
             window=100,
     ):
         super().__init__(budget)
-        self.shares_per_sd = shares_per_sd
         self.window = window
+        self.mode = mode
+        self.scale = scale
+        
+        # state for tracking sample stats
         self.sum = 0
         self.sumSq = 0
         self.count = 0
         self.mu = None
         self.sd = None
-        self.scale = scale
         
-        # tmp
+        # series data for introspection
         self.min = None
         self.max = None
         self.mins = []
@@ -92,23 +94,37 @@ class StdDevDetail(Model):
             self.sd_diffs.append(sd_diff)
             
             # incorporate uncertainty around estimated mu?
-            sigma_mu = self.sd/np.sqrt(n)
+            sigma_mu = self.mu/np.sqrt(n)
             self.sigma_mus.append(sigma_mu)
             
             # decide
-            if self.shares_per_sd is not None:
-                x = -int(sd_diff * self.shares_per_sd)
-            else:
+            if self.mode == 'sd_diff':
+                if self.scale == 'max':
+                    if sd_diff == 0:
+                        x = 0
+                    elif sd_diff > 0:
+                        x = self.shares
+                    else:
+                        x = self.balance/price
+                else:
+                    x = -int(sd_diff * self.scale)
+            else: # prob
                 cen = 2 * (p - .5)
                 if cen < 0:
                     # NOTE: using p here like this is more
                     #       like tanh, but we might want something
                     #       more like sinh...
                     ceil = self.balance/price
-                    x = -int(self.scale * ceil * cen)
+                    if self.scale == 'max':
+                        x = ceil
+                    else:
+                        x = -int(self.scale * ceil * cen)
                 else:
                     floor = self.shares
-                    x = -int(self.scale * floor * cen)
+                    if self.scale == 'max':
+                        x = floor
+                    else:
+                        x = -int(self.scale * floor * cen)
         else:
             x = 0
         
@@ -117,14 +133,13 @@ class StdDevDetail(Model):
             over = cost - self.balance
             self.overs.append(over)
             self.overshares.append(int(np.ceil(over/price)))
-            
-            cost = self.balance if self.clip else 0
-            x = int(round(cost/price))
+            x = int(self.balance//price)
+            cost = price * x
         elif x < -self.shares:
             overshare = x + self.shares
             self.overshares.append(overshare)
             self.overs.append(overshare * price)
-            x = -self.shares if self.clip else 0
+            x = -self.shares
             cost = price * x
         else:
             self.overs.append(0)

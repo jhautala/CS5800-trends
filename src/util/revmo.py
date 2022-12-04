@@ -11,7 +11,7 @@ import numpy as np
 # internal
 from util.model import Model, default_budget
 
-class ReactiveGreedy(Model):
+class ReverseMomentum(Model):
     def __init__(
             self,
             budget=default_budget,

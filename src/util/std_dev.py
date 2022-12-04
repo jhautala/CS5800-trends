@@ -60,9 +60,9 @@ class ReactiveStdDev(Model):
         
         cost = price * x
         if cost > self.balance:
-            cost = self.balance if self.clip else 0
-            x = int(round(cost/price))
+            x = int(self.balance//price)
+            cost = price * x
         elif x < -self.shares:
-            x = -self.shares if self.clip else 0
+            x = -self.shares
             cost = price * x
         return x

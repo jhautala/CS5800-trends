@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 # internal
 from util.data import one_dim
 from util.std_dev_detail import StdDevDetail
+from util.revmo import ReverseMomentum
 
 
 alt_mid = {
@@ -144,8 +145,8 @@ def plot(
         f'budget={model.budget}',
         f'window={model.window}',
     ]
-    if model.shares_per_sd is not None:
-        model_params.append(f'shares_per_sd={model.shares_per_sd}')
+    if model.scale is not None:
+        model_params.append(f'scale={model.scale}')
     else:
         model_params.append(f'scale={model.scale}')
     model_name = type(model).__name__
@@ -186,12 +187,13 @@ def run_model(desc, model, save_fig=False):
         model.evaluate(one_dim[:i].copy())
     print(f'financial performance: {model.get_net_value()}')
     
-    # tmp0 = one_dim.copy()[:-1]
-    # tmp1 = one_dim.copy()[1:]
+    # tmp0 = one_dim.copy()[1:-1]
+    # tmp1 = one_dim.copy()[2:]
     # tmp2 = tmp1 - tmp0
-    # tmp2.min()
+    # tmp2.max()
     # pd.DataFrame(tmp2).describe()
 
+    # plot(desc, model, alt='sigma_mus', save_fig=save_fig)
     plot(desc, model, alt='std devs', save_fig=save_fig)
     plot(desc, model, alt='num SDs from prior', save_fig=save_fig)
     plot(desc, model, alt='z-scores', save_fig=save_fig)
@@ -201,11 +203,19 @@ def run_model(desc, model, save_fig=False):
     # plot(desc, model, alt='overshares', save_fig=save_fig)
     plot(desc, model, save_fig=save_fig)
     plot(desc, model, alt='decision costs', save_fig=save_fig)
-    # plot(desc, model, alt='sigma_mus', save_fig=save_fig)
-
-
+    
+    # compare open vs close
+    # tmp0 = one_dim[:-1]
+    # tmp1 = one_dim[1:]
+    # tmp0[0]
+    # tmp1[0]
+    # tmp2 = tmp1 - tmp0
+    # pd.DataFrame(tmp2).describe()
+    # plt.scatter(x=tmp0, y=tmp1)
+    # plt.plot(tmp2)
+    # plt.show()
 def main():
-    save_fig = False
+    save_fig = True
     
     # best model...
     # tmp = BuyOpenSellClose()
@@ -214,24 +224,35 @@ def main():
     # tmp.get_net_value()
     
     # previous best...
-    # model = StdDevDetail(shares_per_sd=485)
+    # model = StdDevDetail(scale=485)
     # wtf! this does better than previous brute force calculation...
-    # model = StdDevDetail(shares_per_sd=2089983722656843.0)
+    # model = StdDevDetail(scale=2089983722656843.0)
     
-    model = StdDevDetail(shares_per_sd=600)
-    run_model('sd_diffs', model, save_fig=save_fig)
+    # model = StdDevDetail()
+    # run_model('sd_diffs', model, save_fig=save_fig)
     
-    model = StdDevDetail(shares_per_sd=1e19)
+    model = StdDevDetail(scale=68.6)
     run_model('sd_diffs_cheat', model, save_fig=save_fig)
     
-    model = StdDevDetail(shares_per_sd=None, scale=1)
+    # model = StdDevDetail(scale='max')
+    # run_model('sd_diffs_minmax', model, save_fig=save_fig)
+    
+    model = StdDevDetail(mode='prob')
     run_model('norm', model, save_fig=save_fig)
     
-    model = StdDevDetail(shares_per_sd=None, scale=600)
-    run_model('norm_moderate', model, save_fig=save_fig)
+    # model = StdDevDetail(mode='prob', scale=600)
+    # run_model('norm_moderate', model, save_fig=save_fig)
     
-    model = StdDevDetail(shares_per_sd=None, scale=5.40816327e+15)
+    model = StdDevDetail(mode='prob', scale=1.496)
     run_model('norm_cheat', model, save_fig=save_fig)
+    
+    model = StdDevDetail(mode='prob', scale='max')
+    run_model('norm_minmax', model, save_fig=save_fig)
+    
+    # for i in range(1, len(one_dim)+1):
+    #     model.evaluate(one_dim[:i].copy())
+    # plot('sd_diffs', model, alt='sigma_mus', save_fig=save_fig)
+    
         
     # fig, ax1 = plt.subplots(
     #     figsize=(12, 6),
@@ -253,48 +274,67 @@ def main():
     # plt.show()
     
     
-    # ----- find best params for StdDevDetail with sd diffs
+    # # ----- find best params for ReactiveGreedy
     # results = []
-    # for shares_per_sd in np.linspace(
-    #     1e18,
-    #     1e19,
-    #     # 1e18,
-    #     # 9e18,
-    #     # Out[142]: array([9.00000000e+18, 1.22097914e+21])
-    #     1e18,
-    #     1e19,
-    #     # Out[145]: array([1.00000000e+19, 1.34313175e+21])
-    # ):
-    #     model = StdDevDetail(shares_per_sd=shares_per_sd)
+    # for shares_per in range(1, 5000):
+    #     model = ReverseMomentum(
+    #         shares_per=shares_per,
+    #     )
     #     for i in range(1, len(one_dim)+1):
     #         model.evaluate(one_dim[:i].copy())
     #     value = model.get_net_value()
-    #     results.append([shares_per_sd, value])
+    #     results.append([shares_per, value])
     # results = np.array(results)
-    # np.argmax(results[:,1])
-    # results[49,:]
+    # argmax = np.argmax(results[:,1])
+    # print(f'{argmax}: {results[argmax,:]}')
     
-    # ----- find best params for StdDevDetail with norm prob
-    # def find():
-    #     results = []
-    #     for scale in np.linspace(
-    #         5.2e+15,
-    #         5.615,
-    #     ):
-    #         model = StdDevDetail(shares_per_sd=None, scale=scale)
-    #         for i in range(1, len(one_dim)+1):
-    #             model.evaluate(one_dim[:i].copy())
-    #         value = model.get_net_value()
-    #         results.append([scale, value])
-    #     results = np.array(results)
-    #     np.argmax(results[:,1])
-        
-    #     results[3,:]
-        
-        
-    #     plt.scatter(x=results[:,0], y=results[:,1])
-    #     plt.show()
-        
+    # plt.scatter(x=results[:,0], y=results[:,1])
+    # plt.show()
+    
+    
+    # # ----- find best params for StdDevDetail
+    # mode = 'normprob'
+    # mode = 'sd_diff'
+    
+    # results = []
+    # for scale in np.linspace(
+    #         68.535,
+    #         68.65,
+    #         # 68:70 -> 14: [  68.57142857 4337.069705  ]
+    #         # 60:100 -> 11: [  68.97959184 4259.179675  ]
+    #         # .1:500 -> 8: [  81.71632653 3727.479573  ]
+    #         # ----- normprob
+    #         # 1.49,
+    #         # 1.5,
+    #         # 1:5 -> 6: [1.48979592e+00 2.69312972e+03]
+    #         # 2:3 -> 6: [2.12244898e+00 2.69259995e+03]
+    #         # .1:50 -> 2: [2.13673469e+00 2.66500996e+03]
+    #         # .1:100 -> 1: [2.13877551e+00 2.66357996e+03]
+    #         # .1:200 -> 1: [   4.17959184 2506.299616  ]
+    # ):
+    #     model = StdDevDetail(
+    #         mode=mode,
+    #         scale=scale,
+    #     )
+    #     for i in range(1, len(one_dim)+1):
+    #         model.evaluate(one_dim[:i].copy())
+    #     value = model.get_net_value()
+    #     results.append([scale, value])
+    # results = np.array(results)
+    # argmax = np.argmax(results[:,1])
+    # print(f'{argmax}: {results[argmax,:]}')
+    
+    # plt.scatter(x=results[:,0], y=results[:,1])
+    # plt.show()
+    
+    # for i in range(results.shape[0]):
+    #     if np.isclose(results[i,1], 2.69312972e+03):
+    #         print(f'{i}: {results[i,:]}')
+    
+    # for i in range(results.shape[0]):
+    #     if np.isclose(results[i,1], 4502.859698):
+    #         print(f'{i}: {results[i,0]}')
+    # results[32,:]
         
     #     tmp = pd.DataFrame(results)
     #     tmp.describe()
@@ -307,7 +347,7 @@ def main():
     #         # 2089983722656843.0
     #     ]
     #     for i, scale in enumerate(scales):
-    #         model = StdDevDetail(shares_per_sd=None, scale=scale)
+    #         model = StdDevDetail(mode='prob', scale=scale)
     #         for i in range(1, len(one_dim)+1):
     #             model.evaluate(one_dim[:i].copy())
     #         print(f'financial performance: {model.get_net_value()}')

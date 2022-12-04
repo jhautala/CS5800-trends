@@ -19,6 +19,7 @@ plt.ioff() # disable interactive plotting
 from util.model import Model, default_budget
 from util.data import one_dim
 from util.std_dev import ReactiveStdDev
+from util.revmo import ReverseMomentum
 
 
 # ----- arg parsing
@@ -102,7 +103,7 @@ class ReactiveGreedy(Model):
 class OmniscientMinMax(Model):
     def decide(self, snapshot):
         price = snapshot[-1]
-        if price == 214.767181:
+        if price == 222.949997:
             n = self.balance//price
             return n
         elif price == 479.220001:
@@ -119,13 +120,14 @@ class BuyTheDip(Model):
         return int(np.sign(snapshot[-10] - snapshot[-1]))
 
 # Buy all every morning, sell all every evening
+# NOTE: odd size snapshots indicate open; even size is close
 class BuyOpenSellClose(Model):
     def decide(self, snapshot):
         price = snapshot[-1]
         if (len(snapshot) % 2) == 0:
-            n = self.balance//price
-        else:
             n = -self.shares
+        else:
+            n = self.balance//price
         return n
 
 # Buy all every evening, sell all every morning
@@ -133,24 +135,25 @@ class BuyCloseSellOpen(Model):
     def decide(self, snapshot):
         price = snapshot[-1]
         if (len(snapshot) % 2) == 0:
-            n = -self.shares
-        else:
             n = self.balance//price
+        else:
+            n = -self.shares
         return n
 
 # these models were hand-tuned to optimize the rate of buying/selling
-class ReactiveGreedy_cheat(Model):
-    def decide(self, snapshot):
-        if len(snapshot) < 2:
-            return 0
-        return 42 * int(np.sign(snapshot[-2] - snapshot[-1]))
+class ReactiveGreedy_cheat(ReverseMomentum):
+    def __init__(
+            self,
+            budget=default_budget,
+    ):
+        super().__init__(budget, shares_per=18)
 
 class ReactiveStdDev_cheat(ReactiveStdDev):
     def __init__(
             self,
             budget=default_budget,
     ):
-        super().__init__(budget, shares_per_sd=485, window=100)
+        super().__init__(budget, shares_per_sd=1.454, window=100)
 
 def evaluate_model(
         data,

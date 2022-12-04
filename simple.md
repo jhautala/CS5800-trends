@@ -8,7 +8,7 @@
 
 <img src="figs/price_vs_decisions_LongHaul.png" width=900>
 
-* OptimisticGreedy: always buy exactly one share per iteration
+* OptimisticGreedy: always buy exactly one share per iteration (this ends up being very similar to the LongHaul model)
 
 <img src="figs/price_vs_decisions_OptimisticGreedy.png" width=900>
 
@@ -28,7 +28,7 @@
 
 <img src="figs/price_vs_decisions_BuyTheDip.png" width=900>
 
-* BuyOpenSellClose: buy as many shares as possible each morning and sell all each evening. This model does atronomically well. We may want to adopt scientific notation to make these outcomes legible.
+* BuyOpenSellClose: buy as many shares as possible each morning and sell all each evening.
 
 <img src="figs/price_vs_decisions_BuyOpenSellClose.png" width=900>
 
@@ -38,8 +38,8 @@
 
 ## "Cheat" Models
 
-Since we are only using a single time series, all of our models are indirectly "trained" on "test" data (a sort of cheat, that could lead to overfitting => loss of generality). For some of our models, we tried parameterizing them and found optimal parameters by brute force:
+Since we are only using a single time series, all of our models are indirectly "trained" on "test" data (i.e. any manual adjustments to improve performance are tainted by prescience, a sort of cheat, that could lead to overfitting => loss of generality). For some of our models, we tried parameterizing them and scanning the parameter space for optimal parameters:
 
-* ReactiveGreedy_cheat: This model uses the same logic as ReactiveGreedy (i.e. buying or selling based on negative/positive slope for last two points, respectively) but instead of simply buying/selling exactly one share for each transaction, we tried using other constants. For example we might always try to buy/sell exactly 10 shares. By brute force we determined that, for this data set and initial budget of $10,000, the optimal number of shares was 42 (but [of course it was](https://news.mit.edu/2019/answer-life-universe-and-everything-sum-three-cubes-mathematics-0910)). NOTE: We may need to update this one; the best performer likely uses a higher `shares_per` param.
+* ReactiveGreedy_cheat: This model uses the same logic as ReactiveGreedy (i.e. buying or selling based on negative/positive slope for last two points, respectively) but instead of simply buying/selling exactly one share for each transaction, we tried using other constants. For example we might always try to buy/sell exactly 10 shares. By brute force we determined that, for this data set and initial budget of $10,000, the optimal number of shares was 18.
 
 <img src="figs/price_vs_decisions_ReactiveGreedy_cheat.png" width=900>

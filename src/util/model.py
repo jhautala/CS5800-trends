@@ -19,11 +19,9 @@ class Model:
     def __init__(
             self,
             budget=default_budget,
-            clip=True,
     ):
         self.balance = self.budget = budget     # Balance == budget at the start
         self.shares = 0                         # Start with no shares
-        self.clip = clip                        # False to noop on impossible transactions
         self.equity = 0
         self.volume = 0
         self.volume_shares = 0
@@ -49,26 +47,28 @@ class Model:
         # record current total value
         self.net_values.append(self.get_net_value())
         
-        x = self.decide(snapshot)                       # Share count to transact
-        price = snapshot[-1]                            # Current price is at the end of the list
-        cost = x * price                                
+        # Share count to transact
+        x = self.decide(snapshot)
+        
+        # Current price is at the end of the list
+        price = snapshot[-1]
+        cost = x * price
+        
+        # make sure we have enough cash/shares for the transaction
         # print(
         #     f'intend to {"buy" if x >= 0 else "sell"} {abs(x)} shares '
         #     f'{"+" if x <= 0 else "-"}{abs(cost):.2f}'
         # )
-        if cost > self.balance:                         # Scenarios where desired purchase is too costly
+        # Scenarios where desired purchase is too costly
+        if cost > self.balance:
             # print(f'you can\'t afford that (cost={cost}; balance={self.balance})')
-            if self.clip:                               # Buy only what balance allows
-                x = int(round(self.balance/price))
-            else:                                       # Cancel transaction entirely
-                x = 0
+            x = int(self.balance//price)
             cost = x * price
-        elif x < -self.shares:                          # Scenarios where desired sale is more than shares owned
+        # Scenarios where desired sale is more than shares owned
+        elif x < -self.shares:
             # print(f'you don\'t have enough shares (x={x}; balance={self.shares})')
-            if self.clip:                               # Sell only what is owned
-                x = self.shares
-            else:                                       # Cancel transaction entirely
-                x = 0
+            # Sell only what is owned
+            x = -self.shares
             cost = x * price
         self.shares += x                                # Update count of shares owned
         self.balance -= cost                            # Update balance

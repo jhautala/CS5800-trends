@@ -19,7 +19,7 @@ _data = []
 for day in df['Date']:
     row = df[df['Date'] == day]
     _data.append(row['Open'])
-    _data.append(row['Adj Close'])
+    _data.append(row['Close'])
 one_dim = np.array(_data).ravel()
 
 # Figure out the global min and global max to support the creation of OmniscientMinMax
