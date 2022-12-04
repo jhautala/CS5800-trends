@@ -1,6 +1,6 @@
 ## Simple Models
 
-* LongHaul - This is a simple intuitive model that performs fairly well: Buy as many shares a possible on the first iteration and never sell.
+* LongHaul - Buy as many shares a possible on the first iteration and never sell.
 
 <img src="figs/price_vs_decisions_LongHaul.png" width=900>
 
