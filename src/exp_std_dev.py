@@ -151,8 +151,9 @@ def plot(
     ]
     if model.scale is not None:
         model_params.append(f'scale={model.scale}')
-    else:
-        model_params.append(f'scale={model.scale}')
+    if hasattr(model, 'conserve'):
+        model_params.append(f'conserve={model.conserve}')
+    
     model_name = type(model).__name__
     net_perf = model.get_net_value()
     net_perf = f'{"-" if net_perf < 0 else ""}${abs(net_perf):.2f}'

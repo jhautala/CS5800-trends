@@ -280,18 +280,19 @@ def main():
     
     results = []
     for model_type in [
-            BuyOpenSellClose,
-            BuyCloseSellOpen,
-            Random,
-            OptimisticGreedy,
             BandWagon,
-            ReactiveGreedy,
+            BuyCloseSellOpen,
+            BuyOpenSellClose,
+            BuyTheDip,
+            JHMinMax,
             LongHaul,
             OmniscientMinMax,
-            BuyTheDip,
+            OptimisticGreedy,
+            Random,
+            ReactiveGreedy,
             ReactiveGreedy_cheat,
+            ReactiveStdDev,
             ReactiveStdDev_cheat,
-            JHMinMax,
     ]:
         model_name = model_type.__name__
         # print(f'trying {model_name}')
