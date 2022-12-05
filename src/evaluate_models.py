@@ -65,6 +65,7 @@ include_plots = args.include_plots
 save_figs = args.save_figs
 
 
+# ----- functions for plotting/etc
 def evaluate_model(
         data,
         model_type,
