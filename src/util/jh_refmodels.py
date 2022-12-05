@@ -26,7 +26,7 @@ class JHRandom(Model):
         self.rng = Generator(PCG64(seed))
     
     def decide(self, snapshot):
-        return self.rng.choice([-1, 1])
+        return self.rng.choice([-1, 0, 1])
 
 # Buy at the minimum (using all budget) and sell all at the maximum... if only we had a crystal ball
 class JHOmniscientMinMax(Model):

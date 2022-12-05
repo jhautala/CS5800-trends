@@ -10,6 +10,8 @@ import argparse
 import timeit
 import tracemalloc
 import numpy as np
+import pandas as pd
+import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 plt.ioff() # disable interactive plotting
@@ -85,7 +87,7 @@ def evaluate_model(
 def plot_decisions(
         model,
         time_perf_ms=None,
-        show_plot=False,
+        show_plot=True,
         save_fig=False,
 ):
     xx = df_w_dates.index.values
@@ -117,11 +119,11 @@ def plot_decisions(
         labelcolor=price_color,
     )
     ax1.tick_params(
-        axis='x',          # changes apply to the x-axis
-        which='both',      # both major and minor ticks are affected
-        bottom=False,      # ticks along the bottom edge are off
-        top=False,         # ticks along the top edge are off
-        labelbottom=False  # labels along the bottom edge are off
+        axis='x',          # modify the x-axis
+        which='both',      # apply to both major and minor ticks
+        bottom=False,      # turn off ticks along the bottom edge
+        top=False,         # turn off ticks along the top edge
+        labelbottom=False  # turn off labels along the bottom edge
     )
     
     # ----- plot decisions
@@ -181,11 +183,88 @@ def plot_decisions(
     else:
         plt.close(fig)
 
+# TODO: Reconcile colors with plot_decisions? Black is used for input data
+#       here, but plot_decisions uses it for net model value.
+def plot_comp(
+        fin_comp_data,
+        show_plot=True,
+        save_fig=False,
+):
+    fin_comp_df = None
+    for row in fin_comp_data:
+        _df = pd.DataFrame(
+            row['data'],
+            columns=['Net Value'],
+            index=df_w_dates.index,
+        )
+        _df['Model'] = row['name']
+        fin_comp_df = _df if fin_comp_df is None\
+            else pd.concat([fin_comp_df, _df])
+    fin_comp_cols = [*fin_comp_df.columns.values]
+    fin_comp_cols.insert(0, 'Time')
+    fin_comp_df.reset_index(inplace=True)
+    fin_comp_df.columns = fin_comp_cols
+    
+    # NOTE: e.g. to convert timestamp to numeric for linreg
+    # fin_comp_df['time'] = fin_comp_df['time'].apply(lambda x: x.value)
+    
+    fig, [ax1, ax2] = plt.subplots(
+        nrows=2,
+        ncols=1,
+        figsize=(12, 8),
+        sharex=True,
+    )
+    sns.lineplot(
+        data=fin_comp_df,
+        x='Time',
+        y='Net Value',
+        hue='Model',
+        palette='tab10',
+        ax=ax1,
+    )
+    ax1.tick_params(
+        axis='x',          # modify the x-axis
+        which='both',      # apply to both major and minor ticks
+        bottom=False,      # turn off ticks along the bottom edge
+        top=False,         # turn off ticks along the top edge
+        labelbottom=False  # turn off labels along the bottom edge
+    )
+    
+    ax2.plot(
+        df_w_dates.index.values,
+        one_dim,
+        color='black',
+    )
+    ax2.set_xlabel('Time')
+    ax2.set_ylabel('Price')
+    fig.suptitle('Financial Performance - A Few Models')
+    plt.tight_layout()
+    plt.tight_layout()
+    if save_fig:
+        plt.savefig(
+            f'figs/model_comparison.png',
+            dpi=300,
+            bbox_inches='tight'
+        )
+    if show_plot:
+        plt.show()
+    else:
+        plt.close(fig)
+    plt.show()
+    
+
 # ----- main execution
 def main():
     # TODO delete these argument override
     include_plots = True
     save_figs = True
+    comp_models = [model_type.__name__ for model_type in [
+        GHBuyCloseSellOpen,
+        JHMinMax,
+        JHOmniscientMinMax,
+        JHRandom,
+    ]]
+    fin_comp_data = []
     
     results = []
     for model_type in [
@@ -212,21 +291,30 @@ def main():
                     number=time_perf_iter,
                 )*1000/time_perf_iter
         model = evaluate_model(one_dim, model_type)
+        fin_perf = model.get_net_value()
         results.append([
             model_name,
             model,
-            model.get_net_value(),
+            fin_perf,
             time_perf_ms,
         ])
+        if model_name in comp_models:
+            fin_comp_data.append({
+                'name': model_name,
+                'data': model.net_values,
+            })
+        
         if include_plots:
             plot_decisions(
                 model,
                 time_perf_ms=time_perf_ms,
-                show_plot=True,
                 save_fig=save_figs,
             )
     
     results = np.array(results)
+    
+    if include_plots:
+        plot_comp(fin_comp_data, save_fig=save_figs)
     
     print('financial performance:')
     for i in np.flip(np.argsort(results[:,2])):
