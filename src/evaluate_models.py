@@ -19,8 +19,8 @@ plt.ioff() # disable interactive plotting
 # internal
 from util.model import Model, default_budget
 from util.data import one_dim, df_w_dates
-from util.std_dev import ReactiveStdDev
-from util.revmo import ReverseMomentum
+from util.jh_std_dev import JHReactiveStdDev
+from util.jh_revmo import JHReverseMomentum
 from util.jh_minmax import JHMinMax
 
 
@@ -143,14 +143,14 @@ class BuyCloseSellOpen(Model):
         return n
 
 # these models were hand-tuned to optimize the rate of buying/selling
-class ReactiveGreedy_cheat(ReverseMomentum):
+class JHReactiveGreedy_cheat(JHReverseMomentum):
     def __init__(
             self,
             budget=default_budget,
     ):
         super().__init__(budget, shares_per=18)
 
-class ReactiveStdDev_cheat(ReactiveStdDev):
+class JHReactiveStdDev_cheat(JHReactiveStdDev):
     def __init__(
             self,
             budget=default_budget,
@@ -290,9 +290,9 @@ def main():
             OptimisticGreedy,
             Random,
             ReactiveGreedy,
-            ReactiveGreedy_cheat,
-            ReactiveStdDev,
-            ReactiveStdDev_cheat,
+            JHReactiveGreedy_cheat,
+            JHReactiveStdDev,
+            JHReactiveStdDev_cheat,
     ]:
         model_name = model_type.__name__
         # print(f'trying {model_name}')

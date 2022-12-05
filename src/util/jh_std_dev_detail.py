@@ -14,7 +14,7 @@ from collections import deque
 # internal
 from util.model import Model, default_budget
 
-class StdDevDetail(Model):
+class JHStdDevDetail(Model):
     def __init__(
             self,
             budget=default_budget,

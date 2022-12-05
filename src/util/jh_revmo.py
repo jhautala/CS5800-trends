@@ -11,7 +11,7 @@ import numpy as np
 # internal
 from util.model import Model, default_budget
 
-class ReverseMomentum(Model):
+class JHReverseMomentum(Model):
     def __init__(
             self,
             budget=default_budget,

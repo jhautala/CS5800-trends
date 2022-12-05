@@ -13,7 +13,7 @@ from matplotlib.ticker import MaxNLocator
 
 # internal
 from util.data import one_dim
-from util.std_dev_detail import StdDevDetail
+from util.std_dev_detail import JHStdDevDetail
 from util.revmo import ReverseMomentum
 
 
@@ -229,9 +229,9 @@ def main():
     # tmp.get_net_value()
     
     # previous best...
-    # model = StdDevDetail(scale=485)
+    # model = JHStdDevDetail(scale=485)
     # wtf! this does better than previous brute force calculation...
-    # model = StdDevDetail(scale=2089983722656843.0)
+    # model = JHStdDevDetail(scale=2089983722656843.0)
 # OmniscientMinMax:
 # 275.88 - 10000.00 + 0.00 = $11275.88
 # inMax:
@@ -259,35 +259,35 @@ def main():
 # OpenSellClose:
 # 073.42 - 10000.00 + 0.00 = $73.42
     
-    model = StdDevDetail()
+    model = JHStdDevDetail()
     run_model('sd_diffs', model, save_fig=save_fig)
     
-    model = StdDevDetail(scale=68.6)
+    model = JHStdDevDetail(scale=68.6)
     run_model('sd_diffs_cheat', model, save_fig=save_fig)
     
-    model = StdDevDetail(scale=68.6, conserve=True)
+    model = JHStdDevDetail(scale=68.6, conserve=True)
     run_model('sd_diffs_conserve', model, save_fig=save_fig)
     
-    # model = StdDevDetail(scale='max')
+    # model = JHStdDevDetail(scale='max')
     # run_model('sd_diffs_minmax', model, save_fig=save_fig)
     
-    model = StdDevDetail(mode='normprob')
+    model = JHStdDevDetail(mode='normprob')
     run_model('norm', model, save_fig=save_fig)
     
-    # model = StdDevDetail(mode='normprob', scale=600)
+    # model = JHStdDevDetail(mode='normprob', scale=600)
     # run_model('norm_moderate', model, save_fig=save_fig)
     
-    model = StdDevDetail(mode='normprob', scale=1.496)
+    model = JHStdDevDetail(mode='normprob', scale=1.496)
     run_model('norm_cheat', model, save_fig=save_fig)
     
-    model = StdDevDetail(mode='normprob', scale='max')
+    model = JHStdDevDetail(mode='normprob', scale='max')
     run_model('norm_minmax', model, save_fig=save_fig)
     
     # ----- try minmax with 1-year window
-    model = StdDevDetail(mode='minmax', window=728)
+    model = JHStdDevDetail(mode='minmax', window=728)
     run_model('minmax', model, save_fig=save_fig)
     
-    model = StdDevDetail(mode='minmax', window=728, conserve=True)
+    model = JHStdDevDetail(mode='minmax', window=728, conserve=True)
     run_model('minmax', model, save_fig=save_fig)
     
     # for i in range(1, len(one_dim)+1):
@@ -333,7 +333,7 @@ def main():
     # plt.show()
     
     
-    # # ----- find best params for StdDevDetail
+    # # ----- find best params for JHStdDevDetail
     # mode = 'sd_diff'
     # mode = 'normprob'
     
@@ -355,7 +355,7 @@ def main():
     #         # .1:100 -> 1: [2.13877551e+00 2.66357996e+03]
     #         # .1:200 -> 1: [   4.17959184 2506.299616  ]
     # ):
-    #     model = StdDevDetail(
+    #     model = JHStdDevDetail(
     #         mode=mode,
     #         scale=scale,
     #     )
@@ -390,7 +390,7 @@ def main():
     #         # 2089983722656843.0
     #     ]
     #     for i, scale in enumerate(scales):
-    #         model = StdDevDetail(mode='normprob', scale=scale)
+    #         model = JHStdDevDetail(mode='normprob', scale=scale)
     #         for i in range(1, len(one_dim)+1):
     #             model.evaluate(one_dim[:i].copy())
     #         print(f'financial performance: {model.get_net_value()}')

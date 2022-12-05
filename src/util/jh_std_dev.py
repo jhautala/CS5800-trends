@@ -12,7 +12,7 @@ import numpy as np
 # internal
 from util.model import Model, default_budget
 
-class ReactiveStdDev(Model):
+class JHReactiveStdDev(Model):
     def __init__(
             self,
             budget=default_budget,
