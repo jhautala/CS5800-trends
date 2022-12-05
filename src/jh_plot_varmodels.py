@@ -191,12 +191,6 @@ def run_model(desc, model, save_fig=False):
     for i in range(1, len(one_dim)+1):
         model.evaluate(one_dim[:i].copy())
     print(f'financial performance: {model.get_net_value()}')
-    
-    # tmp0 = one_dim.copy()[1:-1]
-    # tmp1 = one_dim.copy()[2:]
-    # tmp2 = tmp1 - tmp0
-    # tmp2.max()
-    # pd.DataFrame(tmp2).describe()
 
     # plot(desc, model, alt='sigma_mus', save_fig=save_fig)
     plot(desc, model, alt='std devs', save_fig=save_fig)
@@ -208,30 +202,9 @@ def run_model(desc, model, save_fig=False):
     # plot(desc, model, alt='overshares', save_fig=save_fig)
     plot(desc, model, save_fig=save_fig)
     plot(desc, model, alt='decision costs', save_fig=save_fig)
-    
-    # compare open vs close
-    # tmp0 = one_dim[:-1]
-    # tmp1 = one_dim[1:]
-    # tmp0[0]
-    # tmp1[0]
-    # tmp2 = tmp1 - tmp0
-    # pd.DataFrame(tmp2).describe()
-    # plt.scatter(x=tmp0, y=tmp1)
-    # plt.plot(tmp2)
-    # plt.show()
+
 def main():
     save_fig = False
-    
-    # best model...
-    # tmp = BuyOpenSellClose()
-    # for i in range(1, len(one_dim)+1):
-    #     tmp.evaluate(one_dim[:i].copy())
-    # tmp.get_net_value()
-    
-    # previous best...
-    # model = JHStdDevDetail(scale=485)
-    # wtf! this does better than previous brute force calculation...
-    # model = JHStdDevDetail(scale=2089983722656843.0)
     
     model = JHStdDevDetail()
     run_model('sd_diffs', model, save_fig=save_fig)
@@ -242,14 +215,8 @@ def main():
     model = JHStdDevDetail(scale=68.6, conserve=True)
     run_model('sd_diffs_conserve', model, save_fig=save_fig)
     
-    # model = JHStdDevDetail(scale='max')
-    # run_model('sd_diffs_minmax', model, save_fig=save_fig)
-    
     model = JHStdDevDetail(mode='normprob')
     run_model('norm', model, save_fig=save_fig)
-    
-    # model = JHStdDevDetail(mode='normprob', scale=600)
-    # run_model('norm_moderate', model, save_fig=save_fig)
     
     model = JHStdDevDetail(mode='normprob', scale=1.496)
     run_model('norm_cheat', model, save_fig=save_fig)

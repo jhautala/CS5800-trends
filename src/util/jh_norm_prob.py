@@ -79,3 +79,10 @@ class JHNormProb(Model):
             x = -self.shares
             cost = price * x
         return x
+
+class JHNormProb_tuned(JHNormProb):
+    def __init__(
+            self,
+            budget=default_budget,
+    ):
+        super().__init__(budget, scale=1.496)
