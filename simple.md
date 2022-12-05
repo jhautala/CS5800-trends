@@ -45,6 +45,10 @@
 
 <img src="figs/price_vs_decisions_OmniscientMinMax.png" width=900>
 
+* JHMinMax: This is based on the OmniscientMinMax model, but uses a rolling min/max of historic data.
+
+<img src="figs/price_vs_decisions_JHMinMax.png" width=900>
+
 ## "Cheat" Models
 
 Since we are only working with a single time series, all of our models are indirectly "trained" on "test" data (i.e. any manual adjustments to improve performance are tainted by prescience, a sort of cheat, that could lead to overfitting => loss of generality). For some of our models, we tried parameterizing them and scanning the parameter space for optimal parameters:
