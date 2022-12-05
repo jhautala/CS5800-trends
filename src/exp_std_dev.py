@@ -231,6 +231,32 @@ def main():
     # model = StdDevDetail(scale=485)
     # wtf! this does better than previous brute force calculation...
     # model = StdDevDetail(scale=2089983722656843.0)
+# OmniscientMinMax:
+# 275.88 - 10000.00 + 0.00 = $11275.88
+# inMax:
+# 5.58 - 10000.00 + 20124.09 = $10269.67
+# gHaul:
+# 0.00 - 10000.00 + 14994.42 = $5114.42
+# CloseSellOpen:
+# .73 - 10000.00 + 14994.42 = $5079.15
+# imisticGreedy:
+# 9.48 - 10000.00 + 14599.83 = $4819.31
+# ctiveStdDev_cheat:
+# 88.55 - 10000.00 + 11048.52 = $4337.07
+# dWagon:
+# 53.62 - 10000.00 + 5129.67 = $3383.29
+# ctiveGreedy_cheat:
+# 3.51 - 10000.00 + 12232.29 = $2595.80
+# TheDip:
+# 15.01 - 10000.00 + 4735.08 = $2550.09
+# ctiveStdDev:
+# 225.91 - 10000.00 + 1972.95 = $2198.86
+# dom:
+# 683.40 - 10000.00 + 1183.77 = $1867.17
+# ctiveGreedy:
+# 37.57 - 10000.00 + 8680.98 = $918.55
+# OpenSellClose:
+# 073.42 - 10000.00 + 0.00 = $73.42
     
     model = StdDevDetail()
     run_model('sd_diffs', model, save_fig=save_fig)
@@ -244,17 +270,24 @@ def main():
     # model = StdDevDetail(scale='max')
     # run_model('sd_diffs_minmax', model, save_fig=save_fig)
     
-    model = StdDevDetail(mode='prob')
+    model = StdDevDetail(mode='normprob')
     run_model('norm', model, save_fig=save_fig)
     
-    # model = StdDevDetail(mode='prob', scale=600)
+    # model = StdDevDetail(mode='normprob', scale=600)
     # run_model('norm_moderate', model, save_fig=save_fig)
     
-    model = StdDevDetail(mode='prob', scale=1.496)
+    model = StdDevDetail(mode='normprob', scale=1.496)
     run_model('norm_cheat', model, save_fig=save_fig)
     
-    model = StdDevDetail(mode='prob', scale='max')
+    model = StdDevDetail(mode='normprob', scale='max')
     run_model('norm_minmax', model, save_fig=save_fig)
+    
+    # ----- try minmax with 1-year window
+    model = StdDevDetail(mode='minmax', window=728)
+    run_model('minmax', model, save_fig=save_fig)
+    
+    model = StdDevDetail(mode='minmax', window=728, conserve=True)
+    run_model('minmax', model, save_fig=save_fig)
     
     # for i in range(1, len(one_dim)+1):
     #     model.evaluate(one_dim[:i].copy())
@@ -300,13 +333,15 @@ def main():
     
     
     # # ----- find best params for StdDevDetail
-    # mode = 'normprob'
     # mode = 'sd_diff'
+    # mode = 'normprob'
     
     # results = []
     # for scale in np.linspace(
-    #         68.535,
-    #         68.65,
+    #         1,
+    #         50
+    #         # 68.535,
+    #         # 68.65,
     #         # 68:70 -> 14: [  68.57142857 4337.069705  ]
     #         # 60:100 -> 11: [  68.97959184 4259.179675  ]
     #         # .1:500 -> 8: [  81.71632653 3727.479573  ]
@@ -354,7 +389,7 @@ def main():
     #         # 2089983722656843.0
     #     ]
     #     for i, scale in enumerate(scales):
-    #         model = StdDevDetail(mode='prob', scale=scale)
+    #         model = StdDevDetail(mode='normprob', scale=scale)
     #         for i in range(1, len(one_dim)+1):
     #             model.evaluate(one_dim[:i].copy())
     #         print(f'financial performance: {model.get_net_value()}')

@@ -16,17 +16,26 @@ class ReactiveStdDev(Model):
     def __init__(
             self,
             budget=default_budget,
-            scale=300,
+            scale=1,
             window=100,
+            conserve=False,
     ):
         super().__init__(budget)
         self.scale = scale
         self.window = window
+        self.conserve = conserve
+        
+        # members to track sample stats
         self.sum = 0
         self.sumSq = 0
         self.count = 0
         self.mu = None
         self.sd = None
+        
+        # members to track perceived value (based on purchase price)
+        self.num_bought = 0
+        self.tot_cost = 0
+        self.avg_price = None
     
     def decide(self, snapshot):
         price = snapshot[-1]
@@ -53,7 +62,32 @@ class ReactiveStdDev(Model):
             # calculate num std devs from prior point
             sd_diff = (snapshot[-1] - snapshot[-2])/self.sd
             
-            return -int(sd_diff * self.scale)
+            x = -int(sd_diff * self.scale)
         else:
             # not enough information to make a decision yet
-            return 0
+            x = 0
+        
+        # check intent vs budget
+        # NOTE: This is redundant to Model.evaluate,
+        #       but we need it for the 'conserve' feature.
+        cost = price * x
+        if cost > self.balance:
+            x = int(self.balance//price)
+            cost = price * x
+        elif x < -self.shares:
+            x = -self.shares
+            cost = price * x
+        
+        # check held stock value to make sure not to sell at a loss
+        if x < 0 and self.conserve and price < self.avg_price:
+            x = 0
+            cost = 0
+        
+        # update held stock value
+        self.tot_cost += cost
+        self.num_bought += x
+        self.avg_price = self.tot_cost/self.num_bought\
+            if self.num_bought\
+            else None
+        
+        return x

@@ -21,6 +21,7 @@ from util.model import Model, default_budget
 from util.data import one_dim, df_w_dates
 from util.std_dev import ReactiveStdDev
 from util.revmo import ReverseMomentum
+from util.jh_minmax import JHMinMax
 
 
 # ----- arg parsing
@@ -154,7 +155,7 @@ class ReactiveStdDev_cheat(ReactiveStdDev):
             self,
             budget=default_budget,
     ):
-        super().__init__(budget, scale=68.6)
+        super().__init__(budget, scale=68.6, conserve=True)
 
 def evaluate_model(
         data,
@@ -288,9 +289,9 @@ def main():
             LongHaul,
             OmniscientMinMax,
             BuyTheDip,
-            ReactiveStdDev,
             ReactiveGreedy_cheat,
             ReactiveStdDev_cheat,
+            JHMinMax,
     ]:
         model_name = model_type.__name__
         # print(f'trying {model_name}')
@@ -330,7 +331,7 @@ def main():
     
     if time_perf_iter > 0:
         print(
-            f'time performance {time_perf_iter} '
+            f'average time performance over {time_perf_iter} '
             f'iteration{"" if time_perf_iter == 1 else "s"}:'
         )
         for i in np.argsort(results[:,3]):

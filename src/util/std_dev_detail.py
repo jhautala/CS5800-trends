@@ -86,9 +86,13 @@ class StdDevDetail(Model):
             self.vals.append(price)
         
         # min and max
+        ismin = False
+        ismax = False
         if self.min is None or self.min > price:
+            ismin = True
             self.min = price
         if self.max is None or self.max < price:
+            ismax = True
             self.max = price
         self.mins.append(self.min)
         self.maxs.append(self.max)
@@ -130,7 +134,9 @@ class StdDevDetail(Model):
                         x = self.balance/price
                 else:
                     x = -int(sd_diff * self.scale)
-            else: # prob
+            elif self.mode == 'normprob': # prob
+                # TODO: try different distributions (other than normal)?
+                #       change shape of curve to be flatter near zero
                 cen = 2 * (p - .5)
                 if cen < 0:
                     # NOTE: using p here like this is more
@@ -147,6 +153,16 @@ class StdDevDetail(Model):
                         x = floor
                     else:
                         x = -int(self.scale * floor * cen)
+            elif self.mode == 'minmax':
+                # TODO: try no decision when both ismin and ismax
+                if ismin:
+                    x = int(self.balance//price)
+                elif ismax:
+                    x = -self.shares
+                else:
+                    x = 0
+            else:
+                raise Exception(f'undefined mode: "{self.mode}"')
         else:
             x = 0
         
