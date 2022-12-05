@@ -91,3 +91,10 @@ class JHReactiveStdDev(Model):
             else None
         
         return x
+
+class JHReactiveStdDev_tuned(JHReactiveStdDev):
+    def __init__(
+            self,
+            budget=default_budget,
+    ):
+        super().__init__(budget, scale=68.6, conserve=True)

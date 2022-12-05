@@ -9,19 +9,27 @@ Created on Thu Nov 24 23:39:39 2022
 import argparse
 import timeit
 import tracemalloc
-import math
 import numpy as np
-from numpy.random import Generator, PCG64
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 plt.ioff() # disable interactive plotting
 
 # internal
-from util.model import Model, default_budget
+from util.model import default_budget
 from util.data import one_dim, df_w_dates
-from util.jh_std_dev import JHReactiveStdDev
-from util.jh_revmo import JHReverseMomentum
+
+# models
+# TODO: find a way to simplify all these imports? seems like a lot
+from util.gh_buydip import GHBuyTheDip
+from util.gh_openclose import GHBuyOpenSellClose, GHBuyCloseSellOpen
+from util.jh_std_dev import JHReactiveStdDev_tuned
+from util.jh_simple import \
+    JHBandWagon,\
+    JHLongHaul,\
+    JHReverseMomentum,\
+    JHReverseMomentum_tuned
 from util.jh_minmax import JHMinMax
+from util.jh_refmodels import JHOmniscientMinMax, JHRandom
 
 
 # ----- arg parsing
@@ -56,106 +64,6 @@ time_perf_iter = args.time_performance_iterations
 include_plots = args.include_plots
 save_figs = args.save_figs
 
-
-# ----- models
-# Randomly buy or sell 1 share each day
-class Random(Model):
-    def __init__(
-            self,
-            budget=default_budget,
-            seed=42, # Meaning of life
-    ):
-        super().__init__(budget)
-        self.rng = Generator(PCG64(seed))
-    
-    def decide(self, snapshot):
-        return self.rng.choice([-1, 1])
-
-# Buy and hold (using all budget available on day 1)
-class LongHaul(Model):
-    def decide(self, snapshot):
-        if len(snapshot) == 1:
-            return int(self.balance//snapshot[0])
-        else:
-            return 0
-
-# Buy 1 share every day until budget has been exceeded
-class OptimisticGreedy(Model):
-    '''
-    This model just wants to buy one share each day.
-    '''
-    def decide(self, snapshot):
-        return 1
-
-# Half-day momentum strategy
-class BandWagon(Model):
-    def decide(self, snapshot):
-        if len(snapshot) < 2:
-            return 0
-        return int(np.sign(snapshot[-1] - snapshot[-2]))
-
-# Half-day reverse momentum strategy
-class ReactiveGreedy(Model):
-    def decide(self, snapshot):
-        if len(snapshot) < 2:
-            return 0
-        return int(np.sign(snapshot[-2] - snapshot[-1]))
-
-# Buy at the minimum (using all budget) and sell all at the maximum... if only we had a crystal ball
-class OmniscientMinMax(Model):
-    def decide(self, snapshot):
-        price = snapshot[-1]
-        if price == 222.949997:
-            n = self.balance//price
-            return n
-        elif price == 479.220001:
-            n = -self.shares
-            return n
-        else:
-            return 0
-
-# One week reverse momentum strategy
-class BuyTheDip(Model):
-    def decide(self, snapshot):
-        if len(snapshot) < 10:
-            return 0
-        return int(np.sign(snapshot[-10] - snapshot[-1]))
-
-# Buy all every morning, sell all every evening
-# NOTE: odd size snapshots indicate open; even size is close
-class BuyOpenSellClose(Model):
-    def decide(self, snapshot):
-        price = snapshot[-1]
-        if (len(snapshot) % 2) == 0:
-            n = -self.shares
-        else:
-            n = self.balance//price
-        return n
-
-# Buy all every evening, sell all every morning
-class BuyCloseSellOpen(Model):
-    def decide(self, snapshot):
-        price = snapshot[-1]
-        if (len(snapshot) % 2) == 0:
-            n = self.balance//price
-        else:
-            n = -self.shares
-        return n
-
-# these models were hand-tuned to optimize the rate of buying/selling
-class JHReactiveGreedy_cheat(JHReverseMomentum):
-    def __init__(
-            self,
-            budget=default_budget,
-    ):
-        super().__init__(budget, shares_per=18)
-
-class JHReactiveStdDev_cheat(JHReactiveStdDev):
-    def __init__(
-            self,
-            budget=default_budget,
-    ):
-        super().__init__(budget, scale=68.6, conserve=True)
 
 def evaluate_model(
         data,
@@ -275,24 +183,22 @@ def plot_decisions(
 # ----- main execution
 def main():
     # TODO delete these argument override
-    # include_plots = True
-    # save_figs = True
+    include_plots = True
+    save_figs = True
     
     results = []
     for model_type in [
-            BandWagon,
-            BuyCloseSellOpen,
-            BuyOpenSellClose,
-            BuyTheDip,
+            GHBuyCloseSellOpen,
+            GHBuyOpenSellClose,
+            GHBuyTheDip,
+            JHBandWagon,
+            JHLongHaul,
             JHMinMax,
-            LongHaul,
-            OmniscientMinMax,
-            OptimisticGreedy,
-            Random,
-            ReactiveGreedy,
-            JHReactiveGreedy_cheat,
-            JHReactiveStdDev,
-            JHReactiveStdDev_cheat,
+            JHOmniscientMinMax,
+            JHRandom,
+            JHReverseMomentum,
+            JHReverseMomentum_tuned,
+            JHReactiveStdDev_tuned,
     ]:
         model_name = model_type.__name__
         # print(f'trying {model_name}')

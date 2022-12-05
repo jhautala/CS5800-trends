@@ -13,7 +13,7 @@ from scipy.stats import norm
 # internal
 from util.model import Model, default_budget
 
-class ReactiveNormProb(Model):
+class JHNormProb(Model):
     def __init__(
             self,
             budget=default_budget,

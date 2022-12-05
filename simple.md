@@ -1,58 +1,54 @@
 ## Simple Models
 
-* LongHaul - Buy as many shares a possible on the first iteration and never sell.
+* JHLongHaul - Buy as many shares a possible on the first iteration and never sell.
 
-<img src="figs/price_vs_decisions_LongHaul.png" width=900>
+<img src="figs/price_vs_decisions_JHLongHaul.png" width=900>
 
-* OptimisticGreedy: Always buy exactly one share per iteration (this ends up being very similar to the LongHaul model, it just takes a little longer to spend all of its money)
+* GHBuyOpenSellClose - Buy as many shares as possible each morning and sell all each evening.
 
-<img src="figs/price_vs_decisions_OptimisticGreedy.png" width=900>
+<img src="figs/price_vs_decisions_GHBuyOpenSellClose.png" width=900>
 
-* BuyOpenSellClose - Buy as many shares as possible each morning and sell all each evening.
+* GHBuyCloseSellOpen - Sell all shares each morning and buy as many as possible each evening.
 
-<img src="figs/price_vs_decisions_BuyOpenSellClose.png" width=900>
+<img src="figs/price_vs_decisions_GHBuyCloseSellOpen.png" width=900>
 
-* BuyCloseSellOpen - Sell all shares each morning and buy as many as possible each evening.
-
-<img src="figs/price_vs_decisions_BuyCloseSellOpen.png" width=900>
-
-* BandWagon - This is a "Momentum" based model, based on the last two points:
+* JHBandWagon - This is a "Momentum" based model, based on the last two points:
   * Buy one share if the current price is greater than the previous
   * Sell one if less
   * Do nothing if equal
 
-<img src="figs/price_vs_decisions_BandWagon.png" width=900>
+<img src="figs/price_vs_decisions_JHBandWagon.png" width=900>
 
-* ReactiveGreedy - This is an immediate "Reverse Momentum" model (i.e. the opposite of the BandWagon model):
+* JHReverseMomentum - This is an immediate "Reverse Momentum" model (i.e. the opposite of the JHBandWagon model):
   * Buy if current price is less than previous
   * Sell if current is greater than previous
   * Do nothing if last two prices are equal
 
-<img src="figs/price_vs_decisions_ReactiveGreedy.png" width=900>
+<img src="figs/price_vs_decisions_JHReverseMomentum.png" width=900>
 
-* BuyTheDip - This is another "Reverse Momentum" model, using a ten point lag:
+* GHBuyTheDip - This is another "Reverse Momentum" model, using a ten point lag:
   * If the current price is lower than the price nine points previously, buy a share
   * If it's higher, sell a share
   * If it's equal it will do nothing
 
-<img src="figs/price_vs_decisions_BuyTheDip.png" width=900>
+<img src="figs/price_vs_decisions_GHBuyTheDip.png" width=900>
 
-* Random: Randomly choose to buy or sell one share per time period. This is a reference model, to give a sense of how each strategy compares to blind guesswork.
+* JHRandom: Randomly choose to buy or sell one share per time period. This is a reference model, to give a sense of how each strategy compares to blind guesswork.
 
-<img src="figs/price_vs_decisions_Random.png" width=900>
+<img src="figs/price_vs_decisions_JHRandom.png" width=900>
 
-* OmniscientMinMax: This is not strictly a valid model (also not truly greedy); it is a refernece model that uses special knowledge to buy as many shares as possible at the global minimum and sell all of its shares at the global maximum. So far it outperforms all our other models, so perhaps it is useful as a provisional upper bound on financial performance.
+* JHOmniscientMinMax: This is not strictly a valid model (also not truly greedy); it is a refernece model that uses special knowledge to buy as many shares as possible at the global minimum and sell all of its shares at the global maximum. So far it outperforms all our other models, so perhaps it is useful as a provisional upper bound on financial performance.
 
-<img src="figs/price_vs_decisions_OmniscientMinMax.png" width=900>
+<img src="figs/price_vs_decisions_JHOmniscientMinMax.png" width=900>
 
-* JHMinMax: This is based on the OmniscientMinMax model, but uses a rolling min/max of historic data.
+* JHMinMax: This is based on the JHOmniscientMinMax model, but uses a rolling min/max of historic data.
 
 <img src="figs/price_vs_decisions_JHMinMax.png" width=900>
 
-## "Cheat" Models
+## "Tuned" Models
 
-Since we are only working with a single time series, all of our models are indirectly "trained" on "test" data (i.e. any manual adjustments to improve performance are tainted by prescience, a sort of cheat, that could lead to overfitting => loss of generality). For some of our models, we tried parameterizing them and scanning the parameter space for optimal parameters:
+Since we are only working with a single time series, all of our models are indirectly "trained" on "test" data (i.e. any manual adjustments to improve performance are tainted by prescience, which could lead to overfitting => loss of generality). For some of our models, we tried parameterizing them and scanning the parameter space for optimal parameters:
 
-* ReactiveGreedy_cheat: This model uses the same logic as ReactiveGreedy (i.e. buying or selling based on negative/positive slope for last two points, respectively) but instead of simply buying/selling exactly one share for each transaction, we tried using other constants. For example we might always try to buy/sell exactly 10 shares. By brute force we determined that, for this data set and initial budget of $10,000, the optimal number of shares was 18, yielding ~43% net value USD over ~3.5 years.
+* JHReverseMomentum_tuned: This model uses the same logic as JHReverseMomentum (i.e. buying or selling based on negative/positive slope for last two points, respectively) but instead of simply buying/selling exactly one share for each transaction, we tried using other constants. For example we might always try to buy/sell exactly 10 shares. By brute force we determined that, for this data set and initial budget of $10,000, the optimal number of shares was 18, yielding ~43% net value USD over ~3.5 years.
 
-<img src="figs/price_vs_decisions_ReactiveGreedy_cheat.png" width=900>
+<img src="figs/price_vs_decisions_JHReverseMomentum_tuned.png" width=900>

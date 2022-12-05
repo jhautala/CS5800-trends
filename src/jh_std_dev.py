@@ -13,8 +13,8 @@ from matplotlib.ticker import MaxNLocator
 
 # internal
 from util.data import one_dim
-from util.std_dev_detail import JHStdDevDetail
-from util.revmo import ReverseMomentum
+from util.jh_std_dev_detail import JHStdDevDetail
+from util.jh_simple import JHReverseMomentum
 
 
 alt_mid = {
@@ -232,32 +232,6 @@ def main():
     # model = JHStdDevDetail(scale=485)
     # wtf! this does better than previous brute force calculation...
     # model = JHStdDevDetail(scale=2089983722656843.0)
-# OmniscientMinMax:
-# 275.88 - 10000.00 + 0.00 = $11275.88
-# inMax:
-# 5.58 - 10000.00 + 20124.09 = $10269.67
-# gHaul:
-# 0.00 - 10000.00 + 14994.42 = $5114.42
-# CloseSellOpen:
-# .73 - 10000.00 + 14994.42 = $5079.15
-# imisticGreedy:
-# 9.48 - 10000.00 + 14599.83 = $4819.31
-# ctiveStdDev_cheat:
-# 88.55 - 10000.00 + 11048.52 = $4337.07
-# dWagon:
-# 53.62 - 10000.00 + 5129.67 = $3383.29
-# ctiveGreedy_cheat:
-# 3.51 - 10000.00 + 12232.29 = $2595.80
-# TheDip:
-# 15.01 - 10000.00 + 4735.08 = $2550.09
-# ctiveStdDev:
-# 225.91 - 10000.00 + 1972.95 = $2198.86
-# dom:
-# 683.40 - 10000.00 + 1183.77 = $1867.17
-# ctiveGreedy:
-# 37.57 - 10000.00 + 8680.98 = $918.55
-# OpenSellClose:
-# 073.42 - 10000.00 + 0.00 = $73.42
     
     model = JHStdDevDetail()
     run_model('sd_diffs', model, save_fig=save_fig)
