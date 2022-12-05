@@ -52,3 +52,7 @@ Since we are only working with a single time series, all of our models are indir
 * JHReverseMomentum_tuned: This model uses the same logic as JHReverseMomentum (i.e. buying or selling based on negative/positive slope for last two points, respectively) but instead of simply buying/selling exactly one share for each transaction, we tried using other constants. For example we might always try to buy/sell exactly 10 shares. By brute force we determined that, for this data set and initial budget of $10,000, the optimal number of shares was 18, yielding ~43% net value USD over ~3.5 years.
 
 <img src="figs/price_vs_decisions_JHReverseMomentum_tuned.png" width=900>
+
+## Comparing Models
+
+<img src="figs/financial_comparison.png" width=900>

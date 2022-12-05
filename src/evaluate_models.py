@@ -187,6 +187,7 @@ def plot_decisions(
 #       here, but plot_decisions uses it for net model value.
 def plot_comp(
         fin_comp_data,
+        incl_sds=False,
         show_plot=True,
         save_fig=False,
 ):
@@ -208,6 +209,10 @@ def plot_comp(
     # NOTE: e.g. to convert timestamp to numeric for linreg
     # fin_comp_df['time'] = fin_comp_df['time'].apply(lambda x: x.value)
     
+    tab10 = sns.color_palette("tab10")
+    (r, g, b) = tab10[0]
+    market_color = '#%02x%02x%02x' % (round(r*255), round(g*255), round(b*255))
+    market_color = 'black'
     fig, [ax1, ax2] = plt.subplots(
         nrows=2,
         ncols=1,
@@ -219,7 +224,8 @@ def plot_comp(
         x='Time',
         y='Net Value',
         hue='Model',
-        palette='tab10',
+        # palette=tab10[1:len(fin_comp_data)+1],
+        palette=tab10[:len(fin_comp_data)],
         ax=ax1,
     )
     ax1.tick_params(
@@ -230,10 +236,38 @@ def plot_comp(
         labelbottom=False  # turn off labels along the bottom edge
     )
     
+    
+    # ----- add delta
+    # fin_comp_df = pd.concat(fin_comp)
+    # fin_comp_df.sort_values(['trend','date'], ascending=[True,True], inplace=True)
+    # df['shift'] = df.groupby('group')['value'].shift()
+    # df['diff'] = df['value'] - df['shift']
+    # df = df[['date','group','value','diff']]
+    
+    # calculate deltas
+    # for row in fin_comp:
+    #     row['delta'] = np.concatenate(
+    #         (
+    #             np.zeros((1,)),
+    #             np.diff(model.net_values),
+    #         ),
+    #     )
+    
+    if incl_sds:
+        deltas = np.diff(one_dim)
+        for i, delta_sds in enumerate(deltas / one_dim.std()):
+            color = 'tab:blue' if delta_sds > 0 else 'tab:orange'
+            [time1, time2] = df_w_dates.index.values[i:i+2]
+            ax2.axvspan(
+                time1,
+                time2,
+                color=color,
+                alpha=abs(np.clip(delta_sds * 2, -1, 1))
+            )
     ax2.plot(
         df_w_dates.index.values,
         one_dim,
-        color='black',
+        color=market_color,
     )
     ax2.set_xlabel('Time')
     ax2.set_ylabel('Price')
@@ -242,7 +276,7 @@ def plot_comp(
     plt.tight_layout()
     if save_fig:
         plt.savefig(
-            f'figs/model_comparison.png',
+            'figs/financial_comparison.png',
             dpi=300,
             bbox_inches='tight'
         )
@@ -251,13 +285,13 @@ def plot_comp(
     else:
         plt.close(fig)
     plt.show()
-    
+
 
 # ----- main execution
 def main():
     # TODO delete these argument override
-    include_plots = True
-    save_figs = True
+    # include_plots = True
+    # save_figs = True
     comp_models = [model_type.__name__ for model_type in [
         GHBuyCloseSellOpen,
         JHMinMax,
@@ -314,7 +348,11 @@ def main():
     results = np.array(results)
     
     if include_plots:
-        plot_comp(fin_comp_data, save_fig=save_figs)
+        plot_comp(
+            fin_comp_data,
+            incl_sds=False,
+            save_fig=save_figs,
+        )
     
     print('financial performance:')
     for i in np.flip(np.argsort(results[:,2])):
