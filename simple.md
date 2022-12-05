@@ -55,4 +55,6 @@ Since we are only working with a single time series, all of our models are indir
 
 ## Comparing Models
 
-<img src="figs/financial_comparison.png" width=900>
+<img src="figs/financial_comparison_4_models.png" width=900>
+
+<img src="figs/model_rankings.png" width=900>

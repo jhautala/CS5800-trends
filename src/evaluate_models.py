@@ -34,40 +34,48 @@ from util.jh_minmax import JHMinMax
 from util.jh_refmodels import JHOmniscientMinMax, JHRandom
 
 
-# ----- arg parsing
-parser = argparse.ArgumentParser(
-    prog = 'CS5800 trends - evaluate models',
-    description = 'Compare different trading models',
-    epilog = 'Text at the bottom of help',
-)
-parser.add_argument(
-    '--time-performance-iterations',
-    metavar='',
-    type=int,
-    default=0,
-    help='iterations per model for measuring time performance'
-)
-parser.add_argument(
-    '--include-plots',
-    type=bool,
-    default=False,
-    help='option to display plots of prices vs decisions'
-)
-parser.add_argument(
-    '--save-figs',
-    type=bool,
-    default=False,
-    help='option to save plots of prices vs decisions'
-)
-
-# - extract args
-args=parser.parse_args()
-time_perf_iter = args.time_performance_iterations
-include_plots = args.include_plots
-save_figs = args.save_figs
+# ----- constants
+savefig_kwargs = {
+    'dpi': 300,
+    'bbox_inches': 'tight',
+}
+comp_models = [model_type.__name__ for model_type in [
+    GHBuyCloseSellOpen,
+    JHMinMax,
+    JHOmniscientMinMax,
+    JHRandom,
+]]
 
 
 # ----- functions for plotting/etc
+def get_tab10():
+    tab10 = plt.get_cmap('tab10')(np.arange(10, dtype=int))
+    return [
+        '#%02x%02x%02x' % (round(r*255), round(g*255), round(b*255))\
+            for (r,g,b,a) in tab10
+    ]
+
+def get_palette(cols=comp_models):
+    '''
+    This is kind of a wonky function for consistently assigning colors to the diabetes dataset predictors.
+    
+    Parameters
+    ----------
+    cols : list of str, optional
+        DESCRIPTION. The default is ['bmi', 's5', 'bp', 's4', 's3', 's6', 's1', 'age', 's2', 'sex'].
+
+    Returns
+    -------
+    list
+        A list of colors in the order.
+
+    '''
+    tab10 = get_tab10()
+    per_col = {}
+    for i,col in enumerate(comp_models):
+        per_col[col] = tab10[i]
+    return [per_col[col] for col in cols]
+
 def evaluate_model(
         data,
         model_type,
@@ -175,8 +183,7 @@ def plot_decisions(
     if save_fig:
         plt.savefig(
             f'figs/price_vs_decisions_{model_name}.png',
-            dpi=300,
-            bbox_inches='tight'
+            **savefig_kwargs,
         )
     if show_plot:
         plt.show()
@@ -209,9 +216,6 @@ def plot_comp(
     # NOTE: e.g. to convert timestamp to numeric for linreg
     # fin_comp_df['time'] = fin_comp_df['time'].apply(lambda x: x.value)
     
-    tab10 = sns.color_palette("tab10")
-    (r, g, b) = tab10[0]
-    market_color = '#%02x%02x%02x' % (round(r*255), round(g*255), round(b*255))
     market_color = 'black'
     fig, [ax1, ax2] = plt.subplots(
         nrows=2,
@@ -219,13 +223,14 @@ def plot_comp(
         figsize=(12, 8),
         sharex=True,
     )
+    
     sns.lineplot(
         data=fin_comp_df,
         x='Time',
         y='Net Value',
         hue='Model',
         # palette=tab10[1:len(fin_comp_data)+1],
-        palette=tab10[:len(fin_comp_data)],
+        palette=get_palette(fin_comp_df['Model'].unique()),
         ax=ax1,
     )
     ax1.tick_params(
@@ -253,6 +258,7 @@ def plot_comp(
     #         ),
     #     )
     
+    # TODO: delete this; it's not fast nor particularly readable...
     if incl_sds:
         deltas = np.diff(one_dim)
         for i, delta_sds in enumerate(deltas / one_dim.std()):
@@ -271,20 +277,126 @@ def plot_comp(
     )
     ax2.set_xlabel('Time')
     ax2.set_ylabel('Price')
-    fig.suptitle('Financial Performance - A Few Models')
+    fig.suptitle(f'Financial Performance - {len(fin_comp_data)} Models')
     plt.tight_layout()
     plt.tight_layout()
     if save_fig:
         plt.savefig(
-            'figs/financial_comparison.png',
-            dpi=300,
-            bbox_inches='tight'
+            f'figs/financial_comparison_{len(fin_comp_data)}_models.png',
+            **savefig_kwargs,
         )
     if show_plot:
         plt.show()
     else:
         plt.close(fig)
-    plt.show()
+
+def plot_rank(
+        results,
+        time_perf_iter,
+        show_plot=True,
+        save_fig=False,
+):
+    _df = pd.DataFrame(
+        results[:,[0,2,3]],
+        columns=['Model', 'Net Value (USD)', 'Avg Time (ms)'],
+    )
+    _df = _df[_df['Model'].isin(comp_models)]
+    _df['const'] = 0
+    
+    fig, [ax1, ax2] = plt.subplots(
+        nrows=2,
+        ncols=1,
+        figsize=(12, 8),
+        sharex=False,
+    )
+    for (ax, asc, col, title) in [
+            (
+                ax1,
+                False,
+                'Net Value (USD)',
+                'Financial Performance',
+            ),
+            (
+                ax2,
+                True,
+                'Avg Time (ms)',
+                f'Time Performance - {time_perf_iter} Iterations',
+            ),
+    ]:
+        _df = _df.sort_values(by=col, ascending=asc)
+        sns.barplot(
+            data=_df,
+            x=col,
+            y='Model',
+            # hue='Model',
+            palette=get_palette(_df['Model'].unique()),
+            orient='h',
+            ax=ax,
+        )
+        ax.title.set_text(title)
+        ax.set_title(title, fontdict={'fontsize': 15 })
+        ax.set_ylabel('')
+        # plt.xticks(rotation = 90)
+        # ax1.set_xlabel('')
+        # ax1.tick_params(
+        #     axis='x',          # modify the x-axis
+        #     which='both',      # apply to both major and minor ticks
+        #     bottom=False,      # turn off ticks along the bottom edge
+        #     top=False,         # turn off ticks along the top edge
+        #     labelbottom=False  # turn off labels along the bottom edge
+        # )
+    plt.tight_layout()
+    plt.subplots_adjust(
+        left=None,
+        bottom=None,
+        right=None,
+        top=None,
+        wspace=None,
+        hspace=.33,
+    )
+
+    if save_fig:
+        plt.savefig(
+            'figs/model_rankings.png',
+            **savefig_kwargs,
+        )
+    if show_plot:
+        plt.show()
+    else:
+        plt.close(fig)
+
+
+# ----- arg parsing
+parser = argparse.ArgumentParser(
+    prog = 'CS5800 trends - evaluate models',
+    description = 'Compare different trading models',
+    epilog = 'Text at the bottom of help',
+)
+parser.add_argument(
+    '--time-performance-iterations',
+    metavar='',
+    type=int,
+    default=0,
+    help='iterations per model for measuring time performance'
+)
+parser.add_argument(
+    '--include-plots',
+    type=bool,
+    default=False,
+    help='option to display plots of prices vs decisions'
+)
+parser.add_argument(
+    '--save-figs',
+    type=bool,
+    default=False,
+    help='option to save plots of prices vs decisions'
+)
+
+# - extract args
+args=parser.parse_args()
+time_perf_iter = args.time_performance_iterations
+include_plots = args.include_plots
+save_figs = args.save_figs
 
 
 # ----- main execution
@@ -292,14 +404,9 @@ def main():
     # TODO delete these argument override
     # include_plots = True
     # save_figs = True
-    comp_models = [model_type.__name__ for model_type in [
-        GHBuyCloseSellOpen,
-        JHMinMax,
-        JHOmniscientMinMax,
-        JHRandom,
-    ]]
-    fin_comp_data = []
+    # time_perf_iter = 100
     
+    fin_comp_data = []
     results = []
     for model_type in [
             GHBuyCloseSellOpen,
@@ -317,15 +424,21 @@ def main():
         model_name = model_type.__name__
         # print(f'trying {model_name}')
         
-        # timeit*1000 to convert time to milliseconds
-        time_perf_ms = None\
-            if time_perf_iter == 0\
-            else timeit.timeit(
-                    lambda: evaluate_model(one_dim, model_type),
-                    number=time_perf_iter,
-                )*1000/time_perf_iter
+        # measure time performance
+        if time_perf_iter == 0:
+            time_perf_ms = None
+        else:
+            # timeit*1000 to convert time to milliseconds
+            time_perf_ms = timeit.timeit(
+                lambda: evaluate_model(one_dim, model_type),
+                number=time_perf_iter,
+            )*1000/time_perf_iter
+        
+        # measure financial performance
         model = evaluate_model(one_dim, model_type)
         fin_perf = model.get_net_value()
+        
+        # save results
         results.append([
             model_name,
             model,
@@ -338,19 +451,31 @@ def main():
                 'data': model.net_values,
             })
         
-        if include_plots:
+        # plot decisions and net value
+        if include_plots or save_figs:
             plot_decisions(
                 model,
                 time_perf_ms=time_perf_ms,
+                show_plot=include_plots,
                 save_fig=save_figs,
             )
     
     results = np.array(results)
     
-    if include_plots:
+    # plot performance comparisons
+    if include_plots or save_figs:
+        # financial trends
         plot_comp(
             fin_comp_data,
-            incl_sds=False,
+            show_plot=include_plots,
+            save_fig=save_figs,
+        )
+        
+        # performance ranking
+        plot_rank(
+            results,
+            time_perf_iter,
+            show_plot=include_plots,
             save_fig=save_figs,
         )
     

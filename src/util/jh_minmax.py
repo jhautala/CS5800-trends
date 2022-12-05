@@ -29,6 +29,8 @@ class JHMinMax(Model):
         self.avg_price = None
         self.min = None
         self.max = None
+        self.imin = None
+        self.imax = None
         self.vals = deque(maxlen=window) if window else None
     
     def decide(self, snapshot):
@@ -42,11 +44,12 @@ class JHMinMax(Model):
                     self.min = None
                 if self.vals[0] == self.max:
                     self.max = None
-                for i in range(1, len(self.vals)):
-                    if self.min is None or self.min > self.vals[i]:
-                        self.min = self.vals[i]
-                    if self.max is None or self.max < self.vals[i]:
-                        self.max = self.vals[i]
+                if self.min is None or self.max is None:
+                    for i in range(1, len(self.vals)):
+                        if self.min is None or self.min > self.vals[i]:
+                            self.min = self.vals[i]
+                        if self.max is None or self.max < self.vals[i]:
+                            self.max = self.vals[i]
             
             # append to vals, pushing vals[0] out of window
             self.vals.append(price)
