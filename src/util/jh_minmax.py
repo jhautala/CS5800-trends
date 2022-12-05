@@ -34,11 +34,11 @@ class JHMinMax(Model):
         self.vals = deque(maxlen=window) if window else None
     
     def decide(self, snapshot):
-        price = snapshot[-1]
+        price = snapshot[-1,0]
         
         if self.window is not None:
             # apply window
-            if len(snapshot) > self.window:
+            if snapshot.shape[0] > self.window:
                 # check to see if min or max is leaving the window
                 if self.vals[0] == self.min:
                     self.min = None

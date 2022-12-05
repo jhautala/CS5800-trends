@@ -56,8 +56,8 @@ class JHStdDevDetail(Model):
         self.overshares = []
     
     def decide(self, snapshot):
-        price = snapshot[-1]
-        n = len(snapshot)
+        price = snapshot[-1,0]
+        n = snapshot.shape[0]
         
         # running stats
         self.sum += price
@@ -67,8 +67,8 @@ class JHStdDevDetail(Model):
         if self.window is not None:
             # apply window
             if self.count > self.window:
-                self.sum -= snapshot[-self.count]
-                self.sumSq -= snapshot[-self.count]**2
+                self.sum -= snapshot[-self.count,0]
+                self.sumSq -= snapshot[-self.count,0]**2
                 self.count -= 1
                 
                 # check to see if min or max is leaving the window
@@ -116,7 +116,7 @@ class JHStdDevDetail(Model):
             self.pp.append(p)
             
             # calculate num std devs from prior point
-            sd_diff = (snapshot[-1] - snapshot[-2])/self.sd
+            sd_diff = (snapshot[-1,0] - snapshot[-2,0])/self.sd
             self.sd_diffs.append(sd_diff)
             
             # incorporate uncertainty around estimated mu?

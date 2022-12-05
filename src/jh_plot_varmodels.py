@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
 # internal
-from util.data import one_dim
+from util.data import one_dim, two_dim
 from util.jh_std_dev_detail import JHStdDevDetail
 from util.jh_simple import JHReverseMomentum
 
@@ -61,7 +61,7 @@ def plot(
     
     
     
-    xx = range(len(one_dim)-1)
+    xx = range(one_dim.shape[0]-1)
     prices = one_dim[1:]
     price_color = 'tab:blue'
     alt_color = 'tab:orange'
@@ -86,7 +86,7 @@ def plot(
         if mid == 'mu':
             mid = np.array(model.mus)[1:]
         else:
-            mid = one_dim[1:]
+            mid = two_dim[1:,0]
         ax1.fill_between(
             xx,
             mid + sds,
@@ -188,8 +188,8 @@ def plot(
     plt.show()
 
 def run_model(desc, model, save_fig=False):
-    for i in range(1, len(one_dim)+1):
-        model.evaluate(one_dim[:i].copy())
+    for i in range(1, two_dim.shape[0]+1):
+        model.evaluate(two_dim[:i,:].copy())
     print(f'financial performance: {model.get_net_value()}')
     
     # tmp0 = one_dim.copy()[1:-1]
@@ -225,7 +225,7 @@ def main():
     # best model...
     # tmp = BuyOpenSellClose()
     # for i in range(1, len(one_dim)+1):
-    #     tmp.evaluate(one_dim[:i].copy())
+    #     tmp.evaluate(two_dim[:i,:].copy())
     # tmp.get_net_value()
     
     # previous best...
@@ -265,7 +265,7 @@ def main():
     run_model('minmax', model, save_fig=save_fig)
     
     # for i in range(1, len(one_dim)+1):
-    #     model.evaluate(one_dim[:i].copy())
+    #     model.evaluate(two_dim[:i,:].copy())
     # plot('sd_diffs', model, alt='sigma_mus', save_fig=save_fig)
     
         
@@ -296,7 +296,7 @@ def main():
     #         shares_per=shares_per,
     #     )
     #     for i in range(1, len(one_dim)+1):
-    #         model.evaluate(one_dim[:i].copy())
+    #         model.evaluate(two_dim[:i,:].copy())
     #     value = model.get_net_value()
     #     results.append([shares_per, value])
     # results = np.array(results)
@@ -334,7 +334,7 @@ def main():
     #         scale=scale,
     #     )
     #     for i in range(1, len(one_dim)+1):
-    #         model.evaluate(one_dim[:i].copy())
+    #         model.evaluate(two_dim[:i,:].copy())
     #     value = model.get_net_value()
     #     results.append([scale, value])
     # results = np.array(results)
@@ -366,7 +366,7 @@ def main():
     #     for i, scale in enumerate(scales):
     #         model = JHStdDevDetail(mode='normprob', scale=scale)
     #         for i in range(1, len(one_dim)+1):
-    #             model.evaluate(one_dim[:i].copy())
+    #             model.evaluate(two_dim[:i,:].copy())
     #         print(f'financial performance: {model.get_net_value()}')
         
     #         run_model(f'norm_{i}', model, save_fig=save_fig)

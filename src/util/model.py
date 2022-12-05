@@ -51,7 +51,7 @@ class Model:
         x = int(self.decide(snapshot))
 
         # Current price is at the end of the list
-        price = snapshot[-1]
+        price = snapshot[-1,0]
         cost = x * price
         
         # make sure we have enough cash/shares for the transaction

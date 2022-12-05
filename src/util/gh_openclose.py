@@ -12,8 +12,8 @@ from util.model import Model
 # NOTE: odd size snapshots indicate open; even size is close
 class GHBuyOpenSellClose(Model):
     def decide(self, snapshot):
-        price = snapshot[-1]
-        if (len(snapshot) % 2) == 0:
+        price = snapshot[-1,0]
+        if (snapshot.shape[0] % 2) == 0:
             n = -self.shares
         else:
             n = self.balance//price
@@ -22,8 +22,8 @@ class GHBuyOpenSellClose(Model):
 # Buy all every evening, sell all every morning
 class GHBuyCloseSellOpen(Model):
     def decide(self, snapshot):
-        price = snapshot[-1]
-        if (len(snapshot) % 2) == 0:
+        price = snapshot[-1,0]
+        if (snapshot.shape[0] % 2) == 0:
             n = self.balance//price
         else:
             n = -self.shares

@@ -18,7 +18,7 @@ plt.ioff() # disable interactive plotting
 
 # internal
 from util.model import default_budget
-from util.data import one_dim, df_w_dates
+from util.data import two_dim, df_w_dates
 
 # models
 # TODO: find a way to simplify all these imports? seems like a lot
@@ -89,7 +89,7 @@ def evaluate_model(
     # curr = start
     # shares = 0
     for i in range(1, n+1):
-        model.evaluate(data[:i].copy())
+        model.evaluate(data[:i,:].copy())
     return model
 
 def plot_decisions(
@@ -113,7 +113,7 @@ def plot_decisions(
     # ----- plot price
     ax1.plot(
         xx,
-        one_dim,
+        two_dim[:,0],
         c=price_color,
         alpha=.5,
     )
@@ -260,8 +260,8 @@ def plot_comp(
     
     # TODO: delete this; it's not fast nor particularly readable...
     if incl_sds:
-        deltas = np.diff(one_dim)
-        for i, delta_sds in enumerate(deltas / one_dim.std()):
+        deltas = np.diff(two_dim[:,0])
+        for i, delta_sds in enumerate(deltas / two_dim[:,0].std()):
             color = 'tab:blue' if delta_sds > 0 else 'tab:orange'
             [time1, time2] = df_w_dates.index.values[i:i+2]
             ax2.axvspan(
@@ -272,7 +272,7 @@ def plot_comp(
             )
     ax2.plot(
         df_w_dates.index.values,
-        one_dim,
+        two_dim[:,0],
         color=market_color,
     )
     ax2.set_xlabel('Time')
@@ -402,7 +402,7 @@ save_figs = args.save_figs
 # ----- main execution
 def main():
     # TODO delete these argument override
-    # include_plots = True
+    include_plots = True
     # save_figs = True
     # time_perf_iter = 100
     
@@ -430,12 +430,12 @@ def main():
         else:
             # timeit*1000 to convert time to milliseconds
             time_perf_ms = timeit.timeit(
-                lambda: evaluate_model(one_dim, model_type),
+                lambda: evaluate_model(two_dim, model_type),
                 number=time_perf_iter,
             )*1000/time_perf_iter
         
         # measure financial performance
-        model = evaluate_model(one_dim, model_type)
+        model = evaluate_model(two_dim, model_type)
         fin_perf = model.get_net_value()
         
         # save results

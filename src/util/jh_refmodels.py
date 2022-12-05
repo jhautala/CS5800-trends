@@ -31,7 +31,7 @@ class JHRandom(Model):
 # Buy at the minimum (using all budget) and sell all at the maximum... if only we had a crystal ball
 class JHOmniscientMinMax(Model):
     def decide(self, snapshot):
-        price = snapshot[-1]
+        price = snapshot[-1,0]
         if price == min_price:
             n = self.balance//price
             return n

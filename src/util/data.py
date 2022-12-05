@@ -8,7 +8,7 @@ Created on Wed Nov 23 19:10:28 2022
 
 import pandas as pd
 import numpy as np
-        
+
 
 # Extract the data
 df = pd.read_csv(
@@ -18,11 +18,17 @@ df = pd.read_csv(
 
 # Convert into a one dimensional list
 _data = []
+_vol = []
 for day in df['Date']:
     row = df[df['Date'] == day]
     _data.append(row['Open'])
     _data.append(row['Close'])
+    _vol.append(np.nan)
+    _vol.append(row['Volume'].to_numpy()[0])
 one_dim = np.array(_data).ravel()
+two_dim = np.stack([one_dim, np.array(_vol)], axis=1)
+del _data
+del _vol
 
 # Find global min and global max to use in OmniscientMinMax
 optimal_buy = None
@@ -49,4 +55,4 @@ for date in df['Date']:
     # regular open/close times
     _dates.append(date + pd.Timedelta(hours=6)) # open
     _dates.append(date + pd.Timedelta(hours=18)) # close
-df_w_dates = pd.DataFrame(one_dim, columns=['Price'], index=_dates)
+df_w_dates = pd.DataFrame(two_dim, columns=['Price', 'Volume'], index=_dates)
