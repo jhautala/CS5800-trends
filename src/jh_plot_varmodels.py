@@ -235,7 +235,7 @@ def main():
     #     model.evaluate(one_dim[:i].copy())
     # plot('sd_diffs', model, alt='sigma_mus', save_fig=save_fig)
     
-        
+    
     # fig, ax1 = plt.subplots(
     #     figsize=(12, 6),
     #     sharex=True,
