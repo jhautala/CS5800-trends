@@ -41,7 +41,7 @@
 
 <img src="figs/price_vs_decisions_JHOmniscientMinMax.png" width=900>
 
-* JHMinMax: This is based on the JHOmniscientMinMax model, but uses a rolling min/max of historic data.
+* JHMinMax: This is based on the JHOmniscientMinMax model, but uses a rolling min/max over the previous 728 points (about a year) of historic data.
 
 <img src="figs/price_vs_decisions_JHMinMax.png" width=900>
 

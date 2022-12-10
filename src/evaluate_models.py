@@ -24,14 +24,15 @@ from util.data import two_dim, df_w_dates
 # TODO: find a way to simplify all these imports? seems like a lot
 from util.gh_buydip import GHBuyTheDip
 from util.gh_openclose import GHBuyOpenSellClose, GHBuyCloseSellOpen
+from util.jh_minmax import JHMinMax
+from util.jh_norm_prob import JHNormProb_tuned
+from util.jh_refmodels import JHOmniscientMinMax, JHRandom
 from util.jh_std_dev import JHReactiveStdDev_tuned
 from util.jh_simple import \
     JHBandWagon,\
     JHLongHaul,\
     JHReverseMomentum,\
     JHReverseMomentum_tuned
-from util.jh_minmax import JHMinMax
-from util.jh_refmodels import JHOmniscientMinMax, JHRandom
 
 
 # ----- constants
@@ -303,12 +304,18 @@ def plot_rank(
     _df = _df[_df['Model'].isin(comp_models)]
     _df['const'] = 0
     
-    fig, [ax1, ax2] = plt.subplots(
-        nrows=2,
-        ncols=1,
-        figsize=(12, 8),
-        sharex=False,
-    )
+    if time_perf_iter:
+        fig, [ax1, ax2] = plt.subplots(
+            nrows=2,
+            ncols=1,
+            figsize=(12, 8),
+            sharex=False,
+        )
+    else:
+        fig, ax1 = plt.subplots(
+            figsize=(12, 6),
+        )
+        ax2 = None
     for (ax, asc, col, title) in [
             (
                 ax1,
@@ -323,6 +330,7 @@ def plot_rank(
                 f'Time Performance - {time_perf_iter} Iterations',
             ),
     ]:
+        if ax is None: continue;
         _df = _df.sort_values(by=col, ascending=asc)
         sns.barplot(
             data=_df,
@@ -415,6 +423,7 @@ def main():
             JHBandWagon,
             JHLongHaul,
             JHMinMax,
+            JHNormProb_tuned,
             JHOmniscientMinMax,
             JHRandom,
             JHReverseMomentum,
