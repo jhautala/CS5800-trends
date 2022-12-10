@@ -27,7 +27,7 @@ class Model:
         self.volume_shares = 0
         self.trades = []
         self.net_values = []
-    
+
     def decide(self, snapshot):
         '''
         Parameters
@@ -42,18 +42,18 @@ class Model:
 
         '''
         return 0
-    
+
     def evaluate(self, snapshot):
         # record current total value
         self.net_values.append(self.get_net_value())
-        
+
         # Share count to transact
         x = int(self.decide(snapshot))
 
         # Current price is at the end of the list
         price = snapshot[-1]
         cost = x * price
-        
+
         # make sure we have enough cash/shares for the transaction
         # print(
         #     f'intend to {"buy" if x >= 0 else "sell"} {abs(x)} shares '
@@ -77,7 +77,7 @@ class Model:
         self.volume_shares += abs(x)                    # Update total count of shares traded
         self.trades.append(x)
         return x
-    
+
     def get_net_value(self):
         return self.balance - self.budget + self.equity # Reducing by budget lets us reflect net change
                                                         # Note this means the worst case scenario is -budget
