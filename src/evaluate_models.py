@@ -33,6 +33,8 @@ from util.jh_simple import \
     JHLongHaul,\
     JHReverseMomentum,\
     JHReverseMomentum_tuned
+from util.mm_buytrendneg import MMbuytrendneg
+from util.mm_buytrendpos import MMbuytrendpos
 
 
 # ----- constants
@@ -45,6 +47,8 @@ comp_models = [model_type.__name__ for model_type in [
     JHMinMax,
     JHOmniscientMinMax,
     JHRandom,
+    # MMbuytrendneg,
+    # MMbuytrendpos,
 ]]
 
 
@@ -173,11 +177,56 @@ def plot_decisions(
     ax3.plot(
         xx,
         model.net_values,
-        color='black',
+        color=price_color,
+        alpha=.5,
     )
     ax3.set_xlabel('Time')
     ax3.set_ylabel('Net Value')
+    ax3.yaxis.label.set_color(price_color)
+    ax3.spines['left'].set_color(price_color)
+    ax3.tick_params(
+        axis='y',
+        which='both',
+        color=price_color,
+        labelcolor=price_color,
+    )
     
+    # calculate profit
+    sell_values = []
+    total_invested = 0
+    shares_held = 0
+    for i, x in enumerate(model.trades):
+        curr_price = one_dim[i]
+        if x > 0:
+            total_invested += curr_price * x
+            shares_held += x
+        elif x < 0:
+            avg_price = total_invested/shares_held
+            total_invested += curr_price * x
+            shares_held += x
+            sell_values.append(-x * (curr_price - avg_price))
+        if x >= 0:
+            prev = sell_values[-1] if len(sell_values) else 0
+            sell_values.append(prev)
+    
+    ax4 = ax3.twinx()
+    ax4.axhline(0, linestyle="--", color=".5")
+    ax4.plot(
+        xx,
+        sell_values,
+        color=value_color,
+        alpha=.5,
+    )
+    ax4.set_xlabel('Time')
+    ax4.set_ylabel('Profit')
+    ax4.yaxis.label.set_color(value_color)
+    ax4.spines['right'].set_color(value_color)
+    ax4.tick_params(
+        axis='y',
+        which='both',
+        color=value_color,
+        labelcolor=value_color,
+    )
     
     # ----- render and save
     plt.tight_layout()
@@ -429,6 +478,8 @@ def main():
             JHReverseMomentum,
             JHReverseMomentum_tuned,
             JHReactiveStdDev_tuned,
+            MMbuytrendneg,
+            MMbuytrendpos,
     ]:
         model_name = model_type.__name__
         # print(f'trying {model_name}')
