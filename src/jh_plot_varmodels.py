@@ -193,8 +193,8 @@ def plot(
     plt.show()
 
 def run_model(trend, desc, model, save_fig=False):
-    for i in range(1, len(trend.one_dim)+1):
-        model.evaluate(trend.one_dim[:i].copy())
+    for i in range(1, trend.two_dim.shape[0]+1):
+        model.evaluate(trend.two_dim[:i,:].copy())
     print(f'financial performance: {model.get_net_value()}')
 
     # plot(trend, desc, model, alt='sigma_mus', save_fig=save_fig)
@@ -210,7 +210,8 @@ def run_model(trend, desc, model, save_fig=False):
 
 def main():
     save_fig = False
-    # trend = ndaq
+    trend = ndaq
+    trend = spy
     
     model = JHStdDevDetail()
     run_model(trend, 'sd_diffs', model, save_fig=save_fig)
@@ -237,8 +238,8 @@ def main():
     model = JHStdDevDetail(mode='minmax', window=728, conserve=True)
     run_model(trend, 'minmax', model, save_fig=save_fig)
     
-    # for i in range(1, len(trend.one_dim)+1):
-    #     model.evaluate(trend.one_dim[:i].copy())
+    # for i in range(1, trend.two_dim.shape[0]+1):
+    #     model.evaluate(trend.two_dim[:i,:].copy())
     # plot('sd_diffs', model, alt='sigma_mus', save_fig=save_fig)
     
     
@@ -268,8 +269,8 @@ def main():
     #     model = JHNormThresh(
     #         pct=pct,
     #     )
-    #     for i in range(1, len(trend.one_dim)+1):
-    #         model.evaluate(trend.one_dim[:i].copy())
+    #     for i in range(1, trend.two_dim.shape[0]+1):
+    #         model.evaluate(trend.two_dim[:i,:].copy())
     #     value = model.get_net_value()
     #     results.append([pct, value])
     # results = np.array(results)
@@ -287,8 +288,8 @@ def main():
     #             window=window,
     #             pct=pct,
     #         )
-    #         for i in range(1, len(trend.one_dim)+1):
-    #             model.evaluate(trend.one_dim[:i].copy())
+    #         for i in range(1, trend.two_dim.shape[0]+1):
+    #             model.evaluate(trend.two_dim[:i,:].copy())
     #         value = model.get_net_value()
     #         gs_results.append([window, pct, value])
     # gs_results = np.array(gs_results)
@@ -313,8 +314,8 @@ def main():
     # trend = ndaq
     # trend = spy
     # model = JHReactiveStdDev(scale=1.68468468)
-    # for i in range(1, len(trend.one_dim)+1):
-    #     model.evaluate(trend.one_dim[:i].copy())
+    # for i in range(1, trend.two_dim.shape[0]+1):
+    #     model.evaluate(trend.two_dim[:i,:].copy())
     # model.get_net_value()
     
     # # ----- find best params for JHReactiveStdDev
@@ -323,8 +324,8 @@ def main():
     #     model = JHReactiveStdDev(
     #         scale=scale,
     #     )
-    #     for i in range(1, len(trend.one_dim)+1):
-    #         model.evaluate(trend.one_dim[:i].copy())
+    #     for i in range(1, trend.two_dim.shape[0]+1):
+    #         model.evaluate(trend.two_dim[:i,:].copy())
     #     value = model.get_net_value()
     #     results.append([scale, value])
     # results = np.array(results)
@@ -341,8 +342,8 @@ def main():
     #     model = ReverseMomentum(
     #         shares_per=shares_per,
     #     )
-    #     for i in range(1, len(trend.one_dim)+1):
-    #         model.evaluate(trend.one_dim[:i].copy())
+    #     for i in range(1, trend.two_dim.shape[0]+1):
+    #         model.evaluate(trend.two_dim[:i,:].copy())
     #     value = model.get_net_value()
     #     results.append([shares_per, value])
     # results = np.array(results)
@@ -379,8 +380,8 @@ def main():
     #         mode=mode,
     #         scale=scale,
     #     )
-    #     for i in range(1, len(trend.one_dim)+1):
-    #         model.evaluate(trend.one_dim[:i].copy())
+    #     for i in range(1, trend.two_dim.shape[0]+1):
+    #         model.evaluate(trend.two_dim[:i,:].copy())
     #     value = model.get_net_value()
     #     results.append([scale, value])
     # results = np.array(results)
@@ -411,8 +412,8 @@ def main():
     #     ]
     #     for i, scale in enumerate(scales):
     #         model = JHStdDevDetail(mode='normprob', scale=scale)
-    #         for i in range(1, len(trend.one_dim)+1):
-    #             model.evaluate(trend.one_dim[:i].copy())
+    #         for i in range(1, trend.two_dim.shape[0]+1):
+    #             model.evaluate(trend.two_dim[:i,:].copy())
     #         print(f'financial performance: {model.get_net_value()}')
         
     #         run_model(f'norm_{i}', model, save_fig=save_fig)

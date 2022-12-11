@@ -43,7 +43,7 @@ class JHRandomProp(Model):
     def decide(self, snapshot):
         decision = self.rng.choice([-1, 0, 1])
         if decision > 0:
-            return self.prop * np.ceil(self.balance//snapshot[-1])
+            return self.prop * np.ceil(self.balance//snapshot[-1,0])
         elif decision < 0:
             return round(self.prop) * self.shares
         else:
@@ -52,7 +52,7 @@ class JHRandomProp(Model):
 # Buy at the minimum (using all budget) and sell all at the maximum... if only we had a crystal ball
 class JHOmniscientMinMax(Model):
     def decide(self, snapshot):
-        price = snapshot[-1]
+        price = snapshot[-1,0]
         if price == spy.min_price:
             n = self.balance//price
             return n
@@ -64,7 +64,7 @@ class JHOmniscientMinMax(Model):
         
 class JHOmniscientMinMaxNdaq(Model):
     def decide(self, snapshot):
-        price = snapshot[-1]
+        price = snapshot[-1,0]
         if price == ndaq.min_price:
             n = self.balance//price
             return n

@@ -31,23 +31,23 @@ class JHMinMax(Model):
         self.imax = None
     
     def decide(self, snapshot):
-        price = snapshot[-1]
+        price = snapshot[-1,0]
         
         if self.window is not None:
             # apply window
-            if len(snapshot) > self.window:
+            if snapshot.shape[0] > self.window:
                 # check to see if min or max is leaving the window
                 leaving = len(snapshot) - self.window - 1
-                if snapshot[leaving] == self.min:
+                if snapshot[leaving,0] == self.min:
                     self.min = None
-                if snapshot[leaving] == self.max:
+                if snapshot[leaving,0] == self.max:
                     self.max = None
                 if self.min is None or self.max is None:
                     for i in range(leaving+1, len(snapshot)):
-                        if self.min is None or self.min > snapshot[i]:
-                            self.min = snapshot[i]
-                        if self.max is None or self.max < snapshot[i]:
-                            self.max = snapshot[i]
+                        if self.min is None or self.min > snapshot[i,0]:
+                            self.min = snapshot[i,0]
+                        if self.max is None or self.max < snapshot[i,0]:
+                            self.max = snapshot[i,0]
         
         # min and max
         ismin = False

@@ -17,7 +17,7 @@ class MMbuytrendneg(Model):
     # if the current price is BELOW the price 2 days before buy all at open and sell all at close 
     def decide(self, snapshot):
         # wait until we have enough history to decide
-        if len(snapshot) < 5:
+        if snapshot.shape[0] < 5:
             return 0
         
         # check to see if we bought this morning
@@ -27,9 +27,9 @@ class MMbuytrendneg(Model):
         
         # check to see if this is open (i.e. odd-size snapshot)
         if len(snapshot) % 2:
-            price = snapshot[-1]
+            price = snapshot[-1,0]
             # check current price < today - 2 days (4 indices)
-            if(snapshot[-1] < snapshot[-5]):
+            if(price < snapshot[-5,0]):
                 self.bought = True
                 return self.balance//price
         

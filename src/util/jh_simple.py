@@ -15,14 +15,14 @@ from util.model import Model, default_budget
 # Half-day momentum strategy
 class JHBandWagon(Model):
     def decide(self, snapshot):
-        if len(snapshot) < 2:
+        if snapshot.shape[0] < 2:
             return 0
-        return int(np.sign(snapshot[-1] - snapshot[-2]))
+        return int(np.sign(snapshot[-1,0] - snapshot[-2,0]))
 
 # Buy and hold (using all budget available on day 1)
 class JHLongHaul(Model):
     def decide(self, snapshot):
-        return int(self.balance//snapshot[-1])
+        return int(self.balance//snapshot[-1,0])
 
 class JHReverseMomentum(Model):
     def __init__(
@@ -34,9 +34,9 @@ class JHReverseMomentum(Model):
         self.shares_per = shares_per
     
     def decide(self, snapshot):
-        if len(snapshot) < 2:
+        if snapshot.shape[0] < 2:
             return 0
-        return self.shares_per * int(np.sign(snapshot[-2] - snapshot[-1]))
+        return self.shares_per * int(np.sign(snapshot[-2,0] - snapshot[-1,0]))
 
 class JHReverseMomentum_tuned(JHReverseMomentum):
     def __init__(

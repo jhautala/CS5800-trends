@@ -20,14 +20,18 @@ class Trend():
             ).sort_values(by='Date')
         self.df = df
         
-        # Convert into a one dimensional list
+        # Convert data into unraveled lists
         _data = []
+        _vol = []
         for day in df['Date']:
             row = df[df['Date'] == day]
             _data.append(row['Open'])
             _data.append(row['Close'])
+            _vol.append(np.nan)
+            _vol.append(row['Volume'].to_numpy()[0])
         one_dim = np.array(_data).ravel()
         self.one_dim = one_dim
+        self.two_dim = np.stack([one_dim, np.array(_vol)], axis=1)
         
         # Find global min and global max to use in OmniscientMinMax
         optimal_buy = None
@@ -51,11 +55,16 @@ class Trend():
         _dates = []
         for date in df['Date']:
             type(date)
-            # # accurate open/close times
+            # # more accurate? open/close times
             # dates.append(date + pd.Timedelta(minutes=570)) # open
             # dates.append(date + pd.Timedelta(hours=16)) # close
             
-            # regular open/close times
+            # regular interval open/close times
             _dates.append(date + pd.Timedelta(hours=6)) # open
             _dates.append(date + pd.Timedelta(hours=18)) # close
-        self.df_w_dates = pd.DataFrame(one_dim, columns=['Price'], index=_dates)
+        
+        self.df_w_dates = pd.DataFrame(
+            self.two_dim,
+            columns=['Price', 'Volume'],
+            index=_dates,
+        )

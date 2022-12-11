@@ -11,6 +11,6 @@ from util.model import Model
 
 class GHBuyTheDip(Model):
     def decide(self, snapshot):
-        if len(snapshot) < 10:
+        if snapshot.shape[0] < 10:
             return 0
-        return int(np.sign(snapshot[-10] - snapshot[-1]))
+        return int(np.sign(snapshot[-10,0] - snapshot[-1,0]))

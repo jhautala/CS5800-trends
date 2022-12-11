@@ -127,19 +127,19 @@ def get_tab10():
     ]
 
 def evaluate_model(
-        data,
+        trend,
         model_type,
         budget=default_budget,
         skip_perf=False,
 ):
-    n = len(data)
+    n = trend.two_dim.shape[0]
     model = model_type(budget)
     # TODO: use local vars for verification?
     # start = model.balance
     # curr = start
     # shares = 0
     for i in range(1, n+1):
-        model.evaluate(data[:i].copy())
+        model.evaluate(trend.two_dim[:i,:].copy())
     return model
 
 def plot_decisions(
@@ -507,12 +507,12 @@ def main():
         else:
             # timeit*1000 to convert time to milliseconds
             time_perf_ms = timeit.timeit(
-                lambda: evaluate_model(trend.one_dim, model_type),
+                lambda: evaluate_model(trend, model_type),
                 number=time_perf_iter,
             )*1000/time_perf_iter
         
         # measure financial performance
-        model = evaluate_model(trend.one_dim, model_type)
+        model = evaluate_model(trend, model_type)
         fin_perf = model.get_net_value()
         
         # save results

@@ -21,6 +21,6 @@ class JHReverseMomentum(Model):
         self.shares_per = shares_per
     
     def decide(self, snapshot):
-        if len(snapshot) < 2:
+        if snapshot.shape[0] < 2:
             return 0
-        return self.shares_per * int(np.sign(snapshot[-2] - snapshot[-1]))
+        return self.shares_per * int(np.sign(snapshot[-2,0] - snapshot[-1,0]))

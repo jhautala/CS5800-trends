@@ -39,7 +39,7 @@ class JHNormProb(Model):
         self.tot_cost = 0
     
     def decide(self, snapshot):
-        price = snapshot[-1]
+        price = snapshot[-1,0]
         
         # running stats
         self.sum += price
@@ -48,8 +48,8 @@ class JHNormProb(Model):
         
         # apply window
         if self.window is not None and self.count > self.window:
-            self.sum -= snapshot[-self.count]
-            self.sumSq -= snapshot[-self.count]**2
+            self.sum -= snapshot[-self.count,0]
+            self.sumSq -= snapshot[-self.count,0]**2
             self.count -= 1
         
         # calculate mean
