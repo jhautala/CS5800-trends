@@ -6,13 +6,16 @@ Created on Fri Dec  2 19:39:06 2022
 @author: jhautala
 """
 
+import pandas as pd
 import numpy as np
 from scipy.stats import norm
 import matplotlib.pyplot as plt
+import seaborn as sns
 from matplotlib.ticker import MaxNLocator
 
 # internal
-from util.data import one_dim
+from util import spy, ndaq
+from util.jh_norm_prob import JHNormThresh
 from util.jh_std_dev import JHReactiveStdDev
 from util.jh_std_dev_detail import JHStdDevDetail
 from util.jh_simple import JHReverseMomentum
@@ -31,6 +34,7 @@ incl_detail = set(['decision shares', 'decision costs'])
 alt_int = set(['decision shares'])
 
 def plot(
+        trend,
         desc,
         model,
         mid=None,
@@ -62,8 +66,8 @@ def plot(
     
     
     
-    xx = range(len(one_dim)-1)
-    prices = one_dim[1:]
+    xx = range(len(trend.one_dim)-1)
+    prices = trend.one_dim[1:]
     price_color = 'tab:blue'
     alt_color = 'tab:orange'
     
@@ -87,7 +91,7 @@ def plot(
         if mid == 'mu':
             mid = np.array(model.mus)[1:]
         else:
-            mid = one_dim[1:]
+            mid = trend.one_dim[1:]
         ax1.fill_between(
             xx,
             mid + sds,
@@ -188,52 +192,53 @@ def plot(
         )
     plt.show()
 
-def run_model(desc, model, save_fig=False):
-    for i in range(1, len(one_dim)+1):
-        model.evaluate(one_dim[:i].copy())
+def run_model(trend, desc, model, save_fig=False):
+    for i in range(1, len(trend.one_dim)+1):
+        model.evaluate(trend.one_dim[:i].copy())
     print(f'financial performance: {model.get_net_value()}')
 
-    # plot(desc, model, alt='sigma_mus', save_fig=save_fig)
-    plot(desc, model, alt='std devs', save_fig=save_fig)
-    plot(desc, model, alt='num SDs from prior', save_fig=save_fig)
-    plot(desc, model, alt='z-scores', save_fig=save_fig)
-    # plot(desc, model, alt='norm probs', save_fig=save_fig)
-    plot(desc, model, alt='net value', save_fig=save_fig)
-    plot(desc, model, alt='overs', save_fig=save_fig)
-    # plot(desc, model, alt='overshares', save_fig=save_fig)
-    plot(desc, model, save_fig=save_fig)
-    plot(desc, model, alt='decision costs', save_fig=save_fig)
+    # plot(trend, desc, model, alt='sigma_mus', save_fig=save_fig)
+    plot(trend, desc, model, alt='std devs', save_fig=save_fig)
+    plot(trend, desc, model, alt='num SDs from prior', save_fig=save_fig)
+    plot(trend, desc, model, alt='z-scores', save_fig=save_fig)
+    # plot(trend, desc, model, alt='norm probs', save_fig=save_fig)
+    plot(trend, desc, model, alt='net value', save_fig=save_fig)
+    plot(trend, desc, model, alt='overs', save_fig=save_fig)
+    # plot(trend, desc, model, alt='overshares', save_fig=save_fig)
+    plot(trend, desc, model, save_fig=save_fig)
+    plot(trend, desc, model, alt='decision costs', save_fig=save_fig)
 
 def main():
     save_fig = False
+    trend = spy
     
     model = JHStdDevDetail()
-    run_model('sd_diffs', model, save_fig=save_fig)
+    run_model(trend, 'sd_diffs', model, save_fig=save_fig)
     
     model = JHStdDevDetail(scale=68.6)
-    run_model('sd_diffs_cheat', model, save_fig=save_fig)
+    run_model(trend, 'sd_diffs_cheat', model, save_fig=save_fig)
     
     model = JHStdDevDetail(scale=68.6, conserve=True)
-    run_model('sd_diffs_conserve', model, save_fig=save_fig)
+    run_model(trend, 'sd_diffs_conserve', model, save_fig=save_fig)
     
     model = JHStdDevDetail(mode='normprob')
-    run_model('norm', model, save_fig=save_fig)
+    run_model(trend, 'norm', model, save_fig=save_fig)
     
     model = JHStdDevDetail(mode='normprob', scale=1.496)
-    run_model('norm_cheat', model, save_fig=save_fig)
+    run_model(trend, 'norm_cheat', model, save_fig=save_fig)
     
     model = JHStdDevDetail(mode='normprob', scale='max')
-    run_model('norm_minmax', model, save_fig=save_fig)
+    run_model(trend, 'norm_minmax', model, save_fig=save_fig)
     
     # ----- try minmax with 1-year window
     model = JHStdDevDetail(mode='minmax', window=728)
-    run_model('minmax', model, save_fig=save_fig)
+    run_model(trend, 'minmax', model, save_fig=save_fig)
     
     model = JHStdDevDetail(mode='minmax', window=728, conserve=True)
-    run_model('minmax', model, save_fig=save_fig)
+    run_model(trend, 'minmax', model, save_fig=save_fig)
     
-    # for i in range(1, len(one_dim)+1):
-    #     model.evaluate(one_dim[:i].copy())
+    # for i in range(1, len(trend.one_dim)+1):
+    #     model.evaluate(trend.one_dim[:i].copy())
     # plot('sd_diffs', model, alt='sigma_mus', save_fig=save_fig)
     
     
@@ -256,14 +261,63 @@ def main():
     # )
     # plt.show()
     
+    
+    # # ----- find best params for JHNormThresh
+    # results = []
+    # for pct in np.linspace(50,67):
+    #     model = JHNormThresh(
+    #         pct=pct,
+    #     )
+    #     for i in range(1, len(trend.one_dim)+1):
+    #         model.evaluate(trend.one_dim[:i].copy())
+    #     value = model.get_net_value()
+    #     results.append([pct, value])
+    # results = np.array(results)
+    # argmax = np.argmax(results[:,1])
+    # print(f'{argmax}: {results[argmax,:]}')
+    
+    # plt.scatter(x=results[:,0], y=results[:,1])
+    # plt.show()
+    
+    
+    # gs_results = []
+    # for window in range(1000, 1001):
+    #     for pct in np.linspace(52,67):
+    #         model = JHNormThresh(
+    #             window=window,
+    #             pct=pct,
+    #         )
+    #         for i in range(1, len(trend.one_dim)+1):
+    #             model.evaluate(trend.one_dim[:i].copy())
+    #         value = model.get_net_value()
+    #         gs_results.append([window, pct, value])
+    # gs_results = np.array(gs_results)
+    
+    # tmp = gs_results[:,2]>10000
+    # # tmp = gs_results[:,0]==600
+    # tmp = gs_results[tmp]
+    # df2 = pd.DataFrame(tmp, columns=['window', 'pct', 'net_value'])
+
+    # sns.scatterplot(df2, x='window', y='pct', hue='net_value')
+    # plt.show()
+    
+    # argmax = np.argmax(gs_results[:,2])
+    # print(f'{argmax}: {gs_results[argmax,:]}')
+    # # 49816: [ 1001.            55.55102041 11388.120186  ]
+    # # 16: [ 1100.            55.55102041 11096.900629  ]
+    
+    # plt.scatter(x=gs_results[:,0], y=gs_results[:,2])
+    # plt.show()
+    
+    
     # # ----- find best params for JHReactiveStdDev
     # results = []
     # for scale in np.linspace(.6, 2):
     #     model = JHReactiveStdDev(
     #         scale=scale,
     #     )
-    #     for i in range(1, len(one_dim)+1):
-    #         model.evaluate(one_dim[:i].copy())
+    #     for i in range(1, len(trend.one_dim)+1):
+    #         model.evaluate(trend.one_dim[:i].copy())
     #     value = model.get_net_value()
     #     results.append([scale, value])
     # results = np.array(results)
@@ -280,8 +334,8 @@ def main():
     #     model = ReverseMomentum(
     #         shares_per=shares_per,
     #     )
-    #     for i in range(1, len(one_dim)+1):
-    #         model.evaluate(one_dim[:i].copy())
+    #     for i in range(1, len(trend.one_dim)+1):
+    #         model.evaluate(trend.one_dim[:i].copy())
     #     value = model.get_net_value()
     #     results.append([shares_per, value])
     # results = np.array(results)
@@ -318,8 +372,8 @@ def main():
     #         mode=mode,
     #         scale=scale,
     #     )
-    #     for i in range(1, len(one_dim)+1):
-    #         model.evaluate(one_dim[:i].copy())
+    #     for i in range(1, len(trend.one_dim)+1):
+    #         model.evaluate(trend.one_dim[:i].copy())
     #     value = model.get_net_value()
     #     results.append([scale, value])
     # results = np.array(results)
@@ -350,8 +404,8 @@ def main():
     #     ]
     #     for i, scale in enumerate(scales):
     #         model = JHStdDevDetail(mode='normprob', scale=scale)
-    #         for i in range(1, len(one_dim)+1):
-    #             model.evaluate(one_dim[:i].copy())
+    #         for i in range(1, len(trend.one_dim)+1):
+    #             model.evaluate(trend.one_dim[:i].copy())
     #         print(f'financial performance: {model.get_net_value()}')
         
     #         run_model(f'norm_{i}', model, save_fig=save_fig)

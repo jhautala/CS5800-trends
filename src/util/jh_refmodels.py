@@ -12,8 +12,8 @@ import numpy as np
 from numpy.random import Generator, PCG64
 
 # internal
+from util import spy, ndaq
 from util.model import Model, default_budget
-from util.data import min_price, max_price
 
 
 # Randomly buy or sell 1 share each day
@@ -53,10 +53,22 @@ class JHRandomProp(Model):
 class JHOmniscientMinMax(Model):
     def decide(self, snapshot):
         price = snapshot[-1]
-        if price == min_price:
+        if price == spy.min_price:
             n = self.balance//price
             return n
-        elif price == max_price:
+        elif price == spy.max_price:
+            n = -self.shares
+            return n
+        else:
+            return 0
+        
+class JHOmniscientMinMaxNdaq(Model):
+    def decide(self, snapshot):
+        price = snapshot[-1]
+        if price == ndaq.min_price:
+            n = self.balance//price
+            return n
+        elif price == ndaq.max_price:
             n = -self.shares
             return n
         else:

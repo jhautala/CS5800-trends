@@ -33,9 +33,9 @@
 
 <img src="figs/price_vs_decisions_GHBuyTheDip.png" width=900>
 
-* JHRandom: Randomly choose to buy or sell one share per time period. This is a reference model, to give a sense of how each strategy compares to blind guesswork.
+* JHRandomProp: Randomly choose to buy, sell, or hold. When buying and selling, this model will buy or sell as much as it can at that time. This is a reference model, to give a sense of how each strategy compares to blind guesswork.
 
-<img src="figs/price_vs_decisions_JHRandom.png" width=900>
+<img src="figs/price_vs_decisions_JHRandomProp.png" width=900>
 
 * JHOmniscientMinMax: This is not strictly a valid model (also not truly greedy); it is a refernece model that uses special knowledge to buy as many shares as possible at the global minimum and sell all of its shares at the global maximum. So far it outperforms all our other models, so perhaps it is useful as a provisional upper bound on financial performance.
 

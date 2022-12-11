@@ -1,0 +1,1 @@
+from .data import Trendspy = Trend('SPY')ndaq = Trend('NDAQ')

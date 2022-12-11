@@ -18,7 +18,7 @@ class JHMinMax(Model):
             self,
             budget=default_budget,
             window=728,
-            conserve=False,
+            conserve=True,
     ):
         super().__init__(budget)
         self.window = window
@@ -26,7 +26,6 @@ class JHMinMax(Model):
         
         self.num_bought = 0
         self.tot_cost = 0
-        self.avg_price = None
         self.min = None
         self.max = None
         self.imin = None
@@ -80,17 +79,27 @@ class JHMinMax(Model):
         elif x < -self.shares:
             x = -self.shares
             cost = price * x
-            
+        
         # check held stock value to make sure not to sell at a loss
-        if x < 0 and self.conserve and price < self.avg_price:
+        if x < 0 and self.conserve and price < self.tot_cost/self.num_bought:
             x = 0
             cost = 0
         
         # update held stock value
         self.tot_cost += cost
         self.num_bought += x
-        self.avg_price = self.tot_cost/self.num_bought\
-            if self.num_bought\
-            else None
         
         return x
+
+class JHMinMax_tuned(JHMinMax):
+    def __init__(
+            self,
+            budget=default_budget,
+            window=728,
+            conserve=True,
+    ):
+        super().__init__(
+            budget,
+            window=window,
+            conserver=conserve,
+        )
