@@ -100,8 +100,8 @@ comp_models = [model_type.__name__ for model_type in [
     JHNormThresh_tuned,
     omniscient_model,
     JHRandomProp,
+    JHReactiveStdDev,
     MMbuytrendneg,
-    # MMbuytrendpos,
 ]]
 
 
@@ -246,7 +246,7 @@ def plot_decisions(
         labelcolor=price_color,
     )
     
-    # calculate profit
+    # ----- plot profit
     sell_values = []
     total_invested = 0
     shares_held = 0
@@ -257,7 +257,7 @@ def plot_decisions(
             shares_held += x
         elif x < 0:
             avg_price = total_invested/shares_held
-            total_invested += curr_price * x
+            total_invested += avg_price * x
             shares_held += x
             sell_values.append(-x * (curr_price - avg_price))
         if x >= 0:
@@ -427,7 +427,7 @@ def plot_rank(
                 ax1,
                 False,
                 'Net Value (USD)',
-                'Financial Performance on {trend.name}',
+                f'Financial Performance on {trend.name}',
             ),
             (
                 ax2,
@@ -471,7 +471,7 @@ def plot_rank(
 
     if save_fig:
         plt.savefig(
-            'figs/{trend.name}_model_rankings.png',
+            f'figs/{trend.name}_model_rankings.png',
             **savefig_kwargs,
         )
     if show_plot:
@@ -568,7 +568,7 @@ def main():
             save_fig=save_figs,
         )
     
-    print('financial performance:')
+    print(f'financial performance on {trend.name}:')
     for i in np.flip(np.argsort(results[:,2])):
         [model_name, model, score, time_perf_ms] = results[i]
         print(

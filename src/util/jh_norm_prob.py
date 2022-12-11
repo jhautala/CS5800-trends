@@ -21,17 +21,19 @@ class JHNormProb(Model):
             window=100,
             z_thresh=None,
             conserve=True,
+            min_profit=None,
     ):
         super().__init__(budget)
         self.window = window
         self.z_thresh = z_thresh
+        self.conserve = conserve
+        self.min_profit = min_profit
         self.sum = 0
         self.sumSq = 0
         self.count = 0
         self.mu = None
         self.sd = None
         self.scale = scale
-        self.conserve = conserve
         self.num_bought = 0
         self.tot_cost = 0
     
@@ -93,13 +95,23 @@ class JHNormProb(Model):
             x = -self.shares
             cost = price * x
         
-        # check held stock value to make sure not to sell at a loss
-        if x < 0 and self.conserve and price < self.tot_cost/self.num_bought:
-            x = 0
-            cost = 0
+        if x < 0:
+            # check held stock value to make sure not to sell at a loss
+            avg_price = self.tot_cost/self.num_bought
+            perceived_value = max(avg_price, self.mu)
+            if self.min_profit is not None:
+                perceived_value *= self.min_profit
+            if self.conserve and price < perceived_value:
+                x = 0
+                cost = 0
+            
+            # update value of held stock
+            self.tot_cost += x * avg_price
+        elif x > 0:
+            # update value of held stock
+            self.tot_cost += cost
         
-        # update held stock value
-        self.tot_cost += cost
+        # update held stock count
         self.num_bought += x
         
         return x
@@ -108,8 +120,13 @@ class JHNormProb_tuned(JHNormProb):
     def __init__(
             self,
             budget=default_budget,
+            min_profit=1.1,
     ):
-        super().__init__(budget, scale=1.496)
+        super().__init__(
+            budget,
+            scale=1.496,
+            min_profit=min_profit,
+        )
 
 class JHNormThresh(JHNormProb):
     def __init__(
@@ -117,12 +134,14 @@ class JHNormThresh(JHNormProb):
             budget=default_budget,
             window=100,
             pct=60,
+            min_profit=None,
     ):
         super().__init__(
             budget=budget,
             window=window,
             scale=1.496,
             z_thresh=norm.ppf(.01 * pct),
+            min_profit=min_profit,
         )
 
 class JHNormThresh_tuned(JHNormThresh):
@@ -130,11 +149,13 @@ class JHNormThresh_tuned(JHNormThresh):
             self,
             budget=default_budget,
             window=1000,
-            # pct=55.55102041,
             pct=55.67346939,
+            # min_profit=1.05,
+            min_profit=None,
     ):
         super().__init__(
             budget=budget,
             window=window,
             pct=pct,
+            min_profit=min_profit,
         )

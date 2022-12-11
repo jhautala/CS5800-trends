@@ -80,13 +80,20 @@ class JHMinMax(Model):
             x = -self.shares
             cost = price * x
         
-        # check held stock value to make sure not to sell at a loss
-        if x < 0 and self.conserve and price < self.tot_cost/self.num_bought:
-            x = 0
-            cost = 0
+        if x < 0:
+            # check held stock value to make sure not to sell at a loss
+            avg_price = self.tot_cost/self.num_bought
+            if self.conserve and price < avg_price:
+                x = 0
+                cost = 0
+            
+            # update value of held stock
+            self.tot_cost += x * avg_price
+        elif x > 0:
+            # update value of held stock
+            self.tot_cost += cost
         
-        # update held stock value
-        self.tot_cost += cost
+        # update held stock count
         self.num_bought += x
         
         return x

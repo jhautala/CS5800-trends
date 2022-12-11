@@ -35,7 +35,6 @@ class JHReactiveStdDev(Model):
         # members to track perceived value (based on purchase price)
         self.num_bought = 0
         self.tot_cost = 0
-        self.avg_price = None
     
     def decide(self, snapshot):
         price = snapshot[-1]
@@ -78,16 +77,20 @@ class JHReactiveStdDev(Model):
             x = -self.shares
             cost = price * x
         
-        # check held stock value to make sure not to sell at a loss
-        if x < 0 and self.conserve and price < self.avg_price:
-            x = 0
-            cost = 0
+        if x < 0:
+            # check held stock value to make sure not to sell at a loss
+            avg_price = self.tot_cost/self.num_bought
+            if self.conserve and price < avg_price:
+                x = 0
+                cost = 0
+            
+            # update value of held stock
+            self.tot_cost += x * avg_price
+        elif x > 0:
+            # update value of held stock
+            self.tot_cost += cost
         
-        # update held stock value
-        self.tot_cost += cost
+        # update held stock count
         self.num_bought += x
-        self.avg_price = self.tot_cost/self.num_bought\
-            if self.num_bought\
-            else None
         
         return x
