@@ -7,8 +7,10 @@ Created on Sun Dec 11 16:48:42 2022
 """
 
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 from itertools import product
+
 
 def scan(trend, model_type, grid):
     items = sorted(grid.items())
@@ -34,4 +36,5 @@ def scan(trend, model_type, grid):
         plt.xlabel(f'{keys[0]}')
         plt.ylabel('Net Value (USD)')
         plt.show()
-    return results
+    
+    return pd.DataFrame(results, columns=['net_value', *keys])
