@@ -33,7 +33,7 @@ class JHRandomProp(Model):
     def __init__(
             self,
             budget=default_budget,
-            prop=1,
+            prop=1.,
             seed=42,
     ):
         super().__init__(budget)
@@ -45,7 +45,7 @@ class JHRandomProp(Model):
         if decision > 0:
             return self.prop * np.ceil(self.balance//snapshot[-1,0])
         elif decision < 0:
-            return round(self.prop) * self.shares
+            return -round(self.prop * self.shares)
         else:
             return 0
 

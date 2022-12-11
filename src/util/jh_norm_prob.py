@@ -17,7 +17,7 @@ class JHNormProb(Model):
     def __init__(
             self,
             budget=default_budget,
-            scale=10,
+            scale=1,
             window=100,
             z_thresh=None,
             conserve=True,

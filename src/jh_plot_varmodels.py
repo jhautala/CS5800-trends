@@ -160,11 +160,10 @@ def plot(
     if hasattr(model, 'conserve'):
         model_params.append(f'conserve={model.conserve}')
     
-    model_name = type(model).__name__
     net_perf = model.get_net_value()
     net_perf = f'{"-" if net_perf < 0 else ""}${abs(net_perf):.2f}'
     title = [
-        f'{model_name} price vs {alt} on {trend.name}',
+        f'{desc} price vs {alt} on {trend.name}',
         f'params: {"; ".join(model_params)}',
     ]
     if alt in incl_detail or alt == 'net value':
@@ -187,38 +186,38 @@ def plot(
     plt.tight_layout()
     if save_fig:
         plt.savefig(
-            f'figs/{trend.name}_std_dev-{desc}-price_vs_{alt}.png',
+            f'figs/{trend.name}_var_{desc}-price_vs_{alt}.png',
             dpi=300,
             bbox_inches='tight'
         )
     plt.show()
 
-def run_model(trend, desc, model, save_fig=False):
+def run_model(trend, model, desc, save_fig=False):
     for i in range(1, trend.two_dim.shape[0]+1):
         model.evaluate(trend.two_dim[:i,:].copy())
     print(f'financial performance: {model.get_net_value()}')
 
-    # plot(trend, desc, model, alt='sigma_mus', save_fig=save_fig)
-    plot(trend, desc, model, alt='std devs', save_fig=save_fig)
-    plot(trend, desc, model, alt='num SDs from prior', save_fig=save_fig)
-    plot(trend, desc, model, alt='z-scores', save_fig=save_fig)
-    # plot(trend, desc, model, alt='norm probs', save_fig=save_fig)
-    plot(trend, desc, model, alt='net value', save_fig=save_fig)
-    plot(trend, desc, model, alt='overs', save_fig=save_fig)
-    # plot(trend, desc, model, alt='overshares', save_fig=save_fig)
-    plot(trend, desc, model, save_fig=save_fig)
-    plot(trend, desc, model, alt='decision costs', save_fig=save_fig)
+    full_desc = f'{type(model).__name__}'
+    if desc is not None:
+        full_desc += f'_{desc}'
+    # plot(trend, full_desc, model, alt='sigma_mus', save_fig=save_fig)
+    plot(trend, full_desc, model, alt='std devs', save_fig=save_fig)
+    plot(trend, full_desc, model, alt='num SDs from prior', save_fig=save_fig)
+    plot(trend, full_desc, model, alt='z-scores', save_fig=save_fig)
+    # plot(trend, full_desc, model, alt='norm probs', save_fig=save_fig)
+    plot(trend, full_desc, model, alt='net value', save_fig=save_fig)
+    plot(trend, full_desc, model, alt='overs', save_fig=save_fig)
+    # plot(trend, full_desc, model, alt='overshares', save_fig=save_fig)
+    plot(trend, full_desc, model, save_fig=save_fig)
+    plot(trend, full_desc, model, alt='decision costs', save_fig=save_fig)
 
 def main():
     save_fig = False
     trend = ndaq
     trend = spy
     
-    model = JHStdDevDetail()
-    run_model(trend, 'sd_diffs', model, save_fig=save_fig)
-    
-    model = JHStdDevDetail(scale=68.6)
-    run_model(trend, 'sd_diffs_cheat', model, save_fig=save_fig)
+    model = JHReactiveStdDev()
+    run_model(trend, model, save_fig=save_fig)
     
     model = JHStdDevDetail(scale=68.6, conserve=True)
     run_model(trend, 'sd_diffs_conserve', model, save_fig=save_fig)
