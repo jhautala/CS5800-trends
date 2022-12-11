@@ -88,7 +88,7 @@ time_perf_iter = args.time_performance_iterations
 include_plots = args.include_plots
 save_figs = args.save_figs
 trend = spy if args.data_source == 'SPY' else ndaq
-# trend = ndaq # TODO: iterate over datasets
+trend = ndaq # TODO: iterate over datasets
 
 omniscient_model = JHOmniscientMinMaxNdaq\
     if trend == ndaq\
@@ -388,7 +388,7 @@ def plot_comp(
     plt.tight_layout()
     if save_fig:
         plt.savefig(
-            f'figs/financial_comparison_{len(fin_comp_data)}_models.png',
+            f'figs/{trend.name}_financial_comparison_{len(fin_comp_data)}_models.png',
             **savefig_kwargs,
         )
     if show_plot:
@@ -483,9 +483,9 @@ def plot_rank(
 # ----- main execution
 def main():
     # TODO delete these argument override
-    # include_plots = True
-    # save_figs = True
-    # time_perf_iter = 100
+    include_plots = True
+    save_figs = True
+    time_perf_iter = 100
     
     fin_comp_data = []
     results = []
