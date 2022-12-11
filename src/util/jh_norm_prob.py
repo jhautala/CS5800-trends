@@ -124,7 +124,8 @@ class JHNormProb_tuned(JHNormProb):
     ):
         super().__init__(
             budget,
-            scale=1.496,
+            # scale=1.496,
+            scale=.243121561,
             min_profit=min_profit,
         )
 
@@ -133,7 +134,7 @@ class JHNormThresh(JHNormProb):
             self,
             budget=default_budget,
             window=100,
-            pct=60,
+            pct=200/3,
             min_profit=None,
     ):
         super().__init__(
@@ -149,7 +150,7 @@ class JHNormThresh_tuned(JHNormThresh):
             self,
             budget=default_budget,
             window=1000,
-            pct=55.67346939,
+            pct=91.75,
             # min_profit=1.05,
             min_profit=None,
     ):

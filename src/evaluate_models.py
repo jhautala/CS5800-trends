@@ -25,7 +25,8 @@ from util import spy, ndaq
 from util.gh_buydip import GHBuyTheDip
 from util.gh_openclose import GHBuyOpenSellClose, GHBuyCloseSellOpen
 from util.jh_minmax import JHMinMax
-from util.jh_norm_prob import JHNormProb_tuned,\
+from util.jh_norm_prob import JHNormProb,\
+    JHNormProb_tuned,\
     JHNormThresh,\
     JHNormThresh_tuned
 from util.jh_refmodels import JHOmniscientMinMax,\
@@ -487,7 +488,9 @@ def main():
             JHBandWagon,
             JHLongHaul,
             JHMinMax,
+            JHNormProb,
             JHNormProb_tuned,
+            JHNormThresh,
             JHNormThresh_tuned,
             omniscient_model,
             JHRandom,
