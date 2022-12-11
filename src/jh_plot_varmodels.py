@@ -19,6 +19,7 @@ from util.jh_norm_prob import JHNormProb, JHNormThresh
 from util.jh_std_dev import JHReactiveStdDev
 from util.jh_std_dev_detail import JHStdDevDetail
 from util.jh_simple import JHReverseMomentum
+from util.paramscan import scan
 
 
 alt_mid = {
@@ -280,7 +281,7 @@ def main():
     # plt.scatter(x=results[:,0], y=results[:,1])
     # plt.title(f'{type(model)}')
     # plt.show()
-    
+    results = scan(spy, JHNormProb, { 'scale': np.linspace(.24, .25, 100)})
     
     # # ----- find best params for JHNormThresh
     # results = []
