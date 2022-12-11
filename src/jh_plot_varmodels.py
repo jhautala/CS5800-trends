@@ -163,7 +163,7 @@ def plot(
     net_perf = model.get_net_value()
     net_perf = f'{"-" if net_perf < 0 else ""}${abs(net_perf):.2f}'
     title = [
-        f'{model_name} price vs {alt}',
+        f'{model_name} price vs {alt} on {trend.name}',
         f'params: {"; ".join(model_params)}',
     ]
     if alt in incl_detail or alt == 'net value':
@@ -186,7 +186,7 @@ def plot(
     plt.tight_layout()
     if save_fig:
         plt.savefig(
-            f'figs/std_dev-{desc}-price_vs_{alt}.png',
+            f'figs/{trend.name}_std_dev-{desc}-price_vs_{alt}.png',
             dpi=300,
             bbox_inches='tight'
         )
@@ -210,7 +210,7 @@ def run_model(trend, desc, model, save_fig=False):
 
 def main():
     save_fig = False
-    trend = spy
+    trend = ndaq
     
     model = JHStdDevDetail()
     run_model(trend, 'sd_diffs', model, save_fig=save_fig)

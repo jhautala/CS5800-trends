@@ -55,7 +55,7 @@ class JHReactiveStdDev(Model):
         if self.count > 1:
             # calculate std dev
             self.sd = np.sqrt(
-                self.sumSq/(self.count-1) - self.mu**2/(self.count**2-self.count)
+                self.sumSq/(self.count-1) - self.count*self.mu**2/(self.count-1)
             )
             
             # calculate num std devs from prior point

@@ -18,6 +18,7 @@ class JHNormProb(Model):
             self,
             budget=default_budget,
             scale=10,
+            
             window=100,
             z_thresh=None,
             conserve=True,
@@ -56,7 +57,7 @@ class JHNormProb(Model):
         if self.count > 1:
             # calculate std dev
             self.sd = np.sqrt(
-                self.sumSq/(self.count-1) - self.mu**2/(self.count**2-self.count)
+                self.sumSq/(self.count-1) - self.count*self.mu**2/(self.count-1)
             )
             
             # calculate z score
@@ -76,7 +77,6 @@ class JHNormProb(Model):
                 
                 cen = 2 * (p - .5)
                 if cen < 0:
-                    # NOTE: this curve 
                     ceil = self.balance/price
                     x = -int(self.scale * ceil * cen)
                 else:

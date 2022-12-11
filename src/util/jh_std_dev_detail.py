@@ -37,7 +37,6 @@ class JHStdDevDetail(Model):
         self.sd = None
         self.num_bought = 0
         self.tot_cost = 0
-        self.avg_price = None
         
         # series data for introspection
         self.min = None
@@ -72,15 +71,17 @@ class JHStdDevDetail(Model):
                 self.count -= 1
                 
                 # check to see if min or max is leaving the window
-                if self.vals[0] == self.min:
+                leaving = len(snapshot) - self.window - 1
+                if snapshot[leaving] == self.min:
                     self.min = None
-                if self.vals[0] == self.max:
+                if snapshot[leaving] == self.max:
                     self.max = None
-                for i in range(1, len(self.vals)):
-                    if self.min is None or self.min > self.vals[i]:
-                        self.min = self.vals[i]
-                    if self.max is None or self.max < self.vals[i]:
-                        self.max = self.vals[i]
+                if self.min is None or self.max is None:
+                    for i in range(leaving+1, len(snapshot)):
+                        if self.min is None or self.min > snapshot[i]:
+                            self.min = snapshot[i]
+                        if self.max is None or self.max < snapshot[i]:
+                            self.max = snapshot[i]
             
             # append to vals, pushing vals[0] out of window
             self.vals.append(price)
@@ -103,7 +104,7 @@ class JHStdDevDetail(Model):
         if self.count > 1:
             # calculate std dev
             self.sd = np.sqrt(
-                self.sumSq/(self.count-1) - self.mu**2/(self.count**2-self.count)
+                self.sumSq/(self.count-1) - self.count*self.mu**2/(self.count)
             )
             self.sds.append(self.sd)
             
@@ -133,7 +134,7 @@ class JHStdDevDetail(Model):
                     else:
                         x = self.balance/price
                 else:
-                    x = -int(sd_diff * self.scale)
+                    x = -int(sd_diff * self.scale * self.balance)
             elif self.mode == 'normprob': # prob
                 # TODO: try different distributions (other than normal)?
                 #       change shape of curve to be flatter near zero
@@ -182,19 +183,22 @@ class JHStdDevDetail(Model):
         else:
             self.overs.append(0)
             self.overshares.append(0)
+        
+        if x < 0:
+            # check held stock value to make sure not to sell at a loss
+            avg_price = self.tot_cost/self.num_bought
+            if self.conserve and price < avg_price:
+                x = 0
+                cost = 0
             
-        # check held stock value to make sure not to sell at a loss
-        if x < 0 and self.conserve and price < self.avg_price:
-            x = 0
-            cost = 0
+            # update value of held stock
+            self.tot_cost += x * avg_price
+        elif x > 0:
+            # update value of held stock
+            self.tot_cost += cost
         
-        # update held stock value
-        self.tot_cost += cost
+        # update held stock count
         self.num_bought += x
-        self.avg_price = self.tot_cost/self.num_bought\
-            if self.num_bought\
-            else None
-        
         self.costs.append(price * x)
         
         return x

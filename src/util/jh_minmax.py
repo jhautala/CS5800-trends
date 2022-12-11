@@ -8,7 +8,6 @@ Created on Sun Dec  4 18:51:27 2022
 
 
 import numpy as np
-from collections import deque
 
 # internal
 from util.model import Model, default_budget
@@ -30,7 +29,6 @@ class JHMinMax(Model):
         self.max = None
         self.imin = None
         self.imax = None
-        self.vals = deque(maxlen=window) if window else None
     
     def decide(self, snapshot):
         price = snapshot[-1]
@@ -39,19 +37,17 @@ class JHMinMax(Model):
             # apply window
             if len(snapshot) > self.window:
                 # check to see if min or max is leaving the window
-                if self.vals[0] == self.min:
+                leaving = len(snapshot) - self.window - 1
+                if snapshot[leaving] == self.min:
                     self.min = None
-                if self.vals[0] == self.max:
+                if snapshot[leaving] == self.max:
                     self.max = None
                 if self.min is None or self.max is None:
-                    for i in range(1, len(self.vals)):
-                        if self.min is None or self.min > self.vals[i]:
-                            self.min = self.vals[i]
-                        if self.max is None or self.max < self.vals[i]:
-                            self.max = self.vals[i]
-            
-            # append to vals, pushing vals[0] out of window
-            self.vals.append(price)
+                    for i in range(leaving+1, len(snapshot)):
+                        if self.min is None or self.min > snapshot[i]:
+                            self.min = snapshot[i]
+                        if self.max is None or self.max < snapshot[i]:
+                            self.max = snapshot[i]
         
         # min and max
         ismin = False

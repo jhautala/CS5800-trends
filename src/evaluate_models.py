@@ -72,12 +72,14 @@ parser.add_argument(
 parser.add_argument(
     '--include-plots',
     type=bool,
+    action=argparse.BooleanOptionalAction,
     default=False,
     help='option to display plots of prices vs decisions'
 )
 parser.add_argument(
     '--save-figs',
     type=bool,
+    action=argparse.BooleanOptionalAction,
     default=False,
     help='option to save plots of prices vs decisions'
 )
@@ -88,7 +90,7 @@ time_perf_iter = args.time_performance_iterations
 include_plots = args.include_plots
 save_figs = args.save_figs
 trend = spy if args.data_source == 'SPY' else ndaq
-trend = ndaq # TODO: iterate over datasets
+# trend = ndaq
 
 omniscient_model = JHOmniscientMinMaxNdaq\
     if trend == ndaq\
@@ -107,18 +109,7 @@ comp_models = [model_type.__name__ for model_type in [
 
 def get_palette(cols=comp_models):
     '''
-    This is kind of a wonky function for consistently assigning colors to the diabetes dataset predictors.
-    
-    Parameters
-    ----------
-    cols : list of str, optional
-        DESCRIPTION. The default is ['bmi', 's5', 'bp', 's4', 's3', 's6', 's1', 'age', 's2', 'sex'].
-
-    Returns
-    -------
-    list
-        A list of colors in the order.
-
+    This is kind of a wonky function for consistently assigning colors to models.
     '''
     tab10 = get_tab10()
     per_col = {}
@@ -483,9 +474,9 @@ def plot_rank(
 # ----- main execution
 def main():
     # TODO delete these argument override
-    include_plots = True
-    save_figs = True
-    time_perf_iter = 100
+    # include_plots = True
+    # save_figs = True
+    # time_perf_iter = 100
     
     fin_comp_data = []
     results = []
@@ -501,9 +492,9 @@ def main():
             omniscient_model,
             JHRandom,
             JHRandomProp,
+            JHReactiveStdDev,
             JHReverseMomentum,
             JHReverseMomentum_tuned,
-            JHReactiveStdDev,
             MMbuytrendneg,
             MMbuytrendpos,
     ]:
