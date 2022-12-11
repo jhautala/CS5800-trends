@@ -210,7 +210,7 @@ def run_model(trend, desc, model, save_fig=False):
 
 def main():
     save_fig = False
-    trend = ndaq
+    # trend = ndaq
     
     model = JHStdDevDetail()
     run_model(trend, 'sd_diffs', model, save_fig=save_fig)
@@ -310,9 +310,16 @@ def main():
     # plt.show()
     
     
+    # trend = ndaq
+    # trend = spy
+    # model = JHReactiveStdDev(scale=1.68468468)
+    # for i in range(1, len(trend.one_dim)+1):
+    #     model.evaluate(trend.one_dim[:i].copy())
+    # model.get_net_value()
+    
     # # ----- find best params for JHReactiveStdDev
     # results = []
-    # for scale in np.linspace(.6, 2):
+    # for scale in np.linspace(.1, 10,1000):
     #     model = JHReactiveStdDev(
     #         scale=scale,
     #     )
