@@ -62,7 +62,7 @@ class JHReactiveStdDev(Model):
             # calculate num std devs from prior point
             sd_diff = (snapshot[-1] - snapshot[-2])/self.sd
             
-            x = -int(sd_diff * self.scale)
+            x = -int(sd_diff * self.scale * self.balance)
         else:
             # not enough information to make a decision yet
             x = 0
@@ -91,10 +91,3 @@ class JHReactiveStdDev(Model):
             else None
         
         return x
-
-class JHReactiveStdDev_tuned(JHReactiveStdDev):
-    def __init__(
-            self,
-            budget=default_budget,
-    ):
-        super().__init__(budget, scale=68.6, conserve=True)

@@ -13,6 +13,7 @@ from matplotlib.ticker import MaxNLocator
 
 # internal
 from util.data import one_dim
+from util.jh_std_dev import JHReactiveStdDev
 from util.jh_std_dev_detail import JHStdDevDetail
 from util.jh_simple import JHReverseMomentum
 
@@ -253,6 +254,23 @@ def main():
     #     color='tab:orange',
     #     alpha=.5
     # )
+    # plt.show()
+    
+    # # ----- find best params for JHReactiveStdDev
+    # results = []
+    # for scale in np.linspace(.6, 2):
+    #     model = JHReactiveStdDev(
+    #         scale=scale,
+    #     )
+    #     for i in range(1, len(one_dim)+1):
+    #         model.evaluate(one_dim[:i].copy())
+    #     value = model.get_net_value()
+    #     results.append([scale, value])
+    # results = np.array(results)
+    # argmax = np.argmax(results[:,1])
+    # print(f'{argmax}: {results[argmax,:]}')
+    
+    # plt.scatter(x=results[:,0], y=results[:,1])
     # plt.show()
     
     

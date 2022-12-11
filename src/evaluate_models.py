@@ -26,8 +26,10 @@ from util.gh_buydip import GHBuyTheDip
 from util.gh_openclose import GHBuyOpenSellClose, GHBuyCloseSellOpen
 from util.jh_minmax import JHMinMax
 from util.jh_norm_prob import JHNormProb_tuned
-from util.jh_refmodels import JHOmniscientMinMax, JHRandom
-from util.jh_std_dev import JHReactiveStdDev_tuned
+from util.jh_refmodels import JHOmniscientMinMax,\
+    JHRandom,\
+    JHRandomProp
+from util.jh_std_dev import JHReactiveStdDev
 from util.jh_simple import \
     JHBandWagon,\
     JHLongHaul,\
@@ -46,7 +48,7 @@ comp_models = [model_type.__name__ for model_type in [
     GHBuyCloseSellOpen,
     JHMinMax,
     JHOmniscientMinMax,
-    JHRandom,
+    JHRandomProp,
     # MMbuytrendneg,
     # MMbuytrendpos,
 ]]
@@ -475,9 +477,10 @@ def main():
             JHNormProb_tuned,
             JHOmniscientMinMax,
             JHRandom,
+            JHRandomProp,
             JHReverseMomentum,
             JHReverseMomentum_tuned,
-            JHReactiveStdDev_tuned,
+            JHReactiveStdDev,
             MMbuytrendneg,
             MMbuytrendpos,
     ]:
