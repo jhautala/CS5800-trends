@@ -19,3 +19,7 @@ evaluate_ndaq:
 plot_comps:
 	python src/evaluate_models.py --time-performance-iterations 100 --data-source SPY --save-figs &&\
 	python src/evaluate_models.py --time-performance-iterations 100 --data-source NDAQ --save-figs
+
+plots_and_perf:
+	python src/evaluate_models.py --time-performance-iterations 100  --save-figs --update-perf --data-source SPY &&\
+	python src/evaluate_models.py --time-performance-iterations 100  --save-figs --update-perf --data-source NDAQ

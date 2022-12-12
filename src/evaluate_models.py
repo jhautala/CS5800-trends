@@ -117,6 +117,9 @@ omniscient_model = RefOmniscientMinMaxNdaq\
     else RefOmniscientMinMax
 
 comp_models = [
+    omniscient_model,
+    RefLongHaul,
+    RefRandomProp,
     COLowAndSlow,
     GHBuyTheDip,
     JHMinMax,
@@ -128,9 +131,6 @@ comp_models = [
     JHReactiveStdDev_tuned,
     # MMbuytrendpos,
     MMbuytrendneg,
-    RefLongHaul,
-    omniscient_model,
-    RefRandomProp,
 ]
 model_names = [model_type.__name__ for model_type in comp_models]
 
