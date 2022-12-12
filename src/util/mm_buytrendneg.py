@@ -6,6 +6,7 @@ Created on Sat Dec 10
 
 from util.model import Model, default_budget
 
+
 class MMbuytrendneg(Model):
     def __init__(
             self,

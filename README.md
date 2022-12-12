@@ -68,14 +68,6 @@ All models are given the same fixed budget at the start of each simulation and t
 
 <img src="figs/SPY_price_vs_decisions_GHBuyTheDip.png" width=900>
 
-### "Tuned" Models
-
-Since we are only working with a single time series, all of our models are indirectly "trained" on "test" data (i.e. any manual adjustments to improve performance are tainted by prescience, which could lead to overfitting => loss of generality). For some of our models, we tried parameterizing them and scanning the parameter space for optimal parameters:
-
-* JHReverseMomentum_tuned: This model uses the same logic as JHReverseMomentum (i.e. buying or selling based on negative/positive slope for last two points, respectively) but instead of simply buying/selling exactly one share for each transaction, we tried using other constants. For example we might always try to buy/sell exactly 10 shares. By brute force we determined that, for this data set and initial budget of $10,000, the optimal number of shares was 18, yielding ~43% net value USD over ~3.5 years.
-
-<img src="figs/SPY_price_vs_decisions_JHReverseMomentum_tuned.png" width=900>
-
 ### Statistical Models
 
 For a detailed description of initial investigation into summary statistics and sliding windows, see [variance models](variance.md).
@@ -83,3 +75,15 @@ For a detailed description of initial investigation into summary statistics and 
 * JHMinMax: This is based on the JHOmniscientMinMax model, but uses a rolling min/max over the previous 728 points (about a year) of historic data.
 
 <img src="figs/SPY_price_vs_decisions_JHMinMax.png" width=900>
+
+### "Tuned" Models
+
+Since we are only working with a single time series, all of our models are indirectly "trained" on "test" data (i.e. any manual adjustments to improve performance are tainted by prescience, which could lead to overfitting => loss of generality).
+For some of our models, we tried parameterizing them and scanning the parameter space for optimal parameters:
+
+* JHReverseMomentum_tuned: This model uses the same logic as JHReverseMomentum (i.e. buying or selling based on negative/positive slope for last two points, respectively) but instead of simply buying/selling exactly one share for each transaction, we parameterized the scale of transactions. 
+First we scaled to our current available cash/shares (i.e. `scale=1`).
+* By brute force we determined that, for this data set and initial budget of $10,000, the optimal number of shares was 18, yielding ~43% net value USD over ~3.5 years.
+
+<img src="figs/SPY_price_vs_decisions_JHReverseMomentum_tuned.png" width=900>
+

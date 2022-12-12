@@ -22,6 +22,7 @@ from util import spy, ndaq
 
 # models
 # TODO: find a way to simplify all these imports? seems like a lot
+from util.co_vol_and_price import COVolumePriceAnd
 from util.gh_buydip import GHBuyTheDip
 from util.gh_openclose import GHBuyOpenSellClose, GHBuyCloseSellOpen
 from util.jh_minmax import JHMinMax
@@ -33,7 +34,7 @@ from util.jh_refmodels import JHOmniscientMinMax,\
     JHOmniscientMinMaxNdaq,\
     JHRandom,\
     JHRandomProp
-from util.jh_std_dev import JHReactiveStdDev
+from util.jh_std_dev import JHReactiveStdDev, JHReactiveStdDev_tuned
 from util.jh_simple import \
     JHBandWagon,\
     JHLongHaul,\
@@ -98,12 +99,16 @@ omniscient_model = JHOmniscientMinMaxNdaq\
     else JHOmniscientMinMax
 
 comp_models = [model_type.__name__ for model_type in [
-    GHBuyCloseSellOpen,
+    COVolumePriceAnd,
+    GHBuyTheDip,
+    JHLongHaul,
     JHMinMax,
-    JHNormThresh_tuned,
+    # JHNormThresh,
+    # JHNormThresh_tuned,
     omniscient_model,
     JHRandomProp,
     JHReactiveStdDev,
+    # JHReactiveStdDev_tuned,
     MMbuytrendneg,
 ]]
 
@@ -482,6 +487,7 @@ def main():
     fin_comp_data = []
     results = []
     for model_type in [
+            COVolumePriceAnd,
             GHBuyCloseSellOpen,
             GHBuyOpenSellClose,
             GHBuyTheDip,
@@ -496,6 +502,7 @@ def main():
             JHRandom,
             JHRandomProp,
             JHReactiveStdDev,
+            JHReactiveStdDev_tuned,
             JHReverseMomentum,
             JHReverseMomentum_tuned,
             MMbuytrendneg,

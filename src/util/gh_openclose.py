@@ -23,7 +23,8 @@ class GHBuyOpenSellClose(Model):
 class GHBuyCloseSellOpen(Model):
     def decide(self, snapshot):
         price = snapshot[-1,0]
-        if (snapshot.shape[0] % 2) == 0:
+        is_close_time = snapshot.shape[0] % 2 == 0
+        if is_close_time:
             n = self.balance//price
         else:
             n = -self.shares

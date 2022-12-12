@@ -94,3 +94,17 @@ class JHReactiveStdDev(Model):
         self.num_bought += x
         
         return x
+
+class JHReactiveStdDev_tuned(JHReactiveStdDev):
+    def __init__(
+            self,
+            budget=default_budget,
+            window=100,
+            conserve=False,
+    ):
+        super().__init__(
+            budget,
+            scale=0.683734,
+            window=window,
+            conserve=conserve,
+        )
