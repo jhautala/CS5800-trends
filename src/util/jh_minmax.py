@@ -17,7 +17,7 @@ class JHMinMax(Model):
             self,
             budget=default_budget,
             window=728,
-            conserve=True,
+            conserve=False,
     ):
         super().__init__(budget)
         self.window = window
@@ -99,7 +99,6 @@ class JHMinMax_tuned(JHMinMax):
             self,
             budget=default_budget,
             window=728,
-            conserve=True,
     ):
         super().__init__(
             budget,

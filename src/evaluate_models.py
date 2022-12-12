@@ -102,8 +102,13 @@ include_plots = args.include_plots
 save_figs = args.save_figs
 update_perf = args.update_perf
 trend = spy if args.data_source == 'SPY' else ndaq
-# trend = ndaq
 
+# TODO delete these argument override
+# trend = ndaq
+# include_plots = True
+# save_figs = True
+# time_perf_iter = 100
+# update_perf = True
 
 # - establish models to compare
 omniscient_model = JHOmniscientMinMaxNdaq\
@@ -115,6 +120,8 @@ comp_models = [
     GHBuyTheDip,
     JHLongHaul,
     JHMinMax,
+    # JHNormProb,
+    # JHNormProb_tuned,
     # JHNormThresh,
     # JHNormThresh_tuned,
     omniscient_model,
@@ -153,10 +160,6 @@ def evaluate_model(
 ):
     n = trend.two_dim.shape[0]
     model = model_type(budget)
-    # TODO: use local vars for verification?
-    # start = model.balance
-    # curr = start
-    # shares = 0
     for i in range(1, n+1):
         model.evaluate(trend.two_dim[:i,:].copy())
     return model
@@ -492,11 +495,6 @@ def plot_rank(
 
 # ----- main execution
 def main():
-    # TODO delete these argument override
-    # include_plots = True
-    # save_figs = True
-    # time_perf_iter = 100
-    
     fin_comp_data = []
     results = []
     for (model_type, model_name) in zip(comp_models, model_names):

@@ -13,6 +13,26 @@ from itertools import product
 
 
 def scan(trend, model_type, grid):
+    '''
+    Perform a scan over given params to find best financial performance.
+    NOTE: This will also display a scatter plot across all parameter values
+        if only one paramater name is in the grid argument.
+
+    Parameters
+    ----------
+    trend : Trend
+        A model of input data.
+    model_type : Model
+        A decision model.
+    grid : dict of lists
+        A dictionary of parameter names to lists of parameter values.
+
+    Returns
+    -------
+    DataFrame
+        A DataFrame containing all the results across all combinations of parameter values.
+
+    '''
     items = sorted(grid.items())
     keys, values = zip(*items)
     results = []

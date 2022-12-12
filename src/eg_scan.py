@@ -11,4 +11,4 @@ from util.jh_norm_prob import JHNormProb
 from util.jh_std_dev import JHReactiveStdDev
 from util.paramscan import scan
 
-results = scan(spy, JHReactiveStdDev, { 'scale': np.linspace(0.01, 10, 100)})
+results = scan(spy, JHReactiveStdDev, { 'scale': np.linspace(1, 40, 100)})
