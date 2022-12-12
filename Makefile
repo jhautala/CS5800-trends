@@ -1,3 +1,7 @@
+update_perf:
+	python src/evaluate_models.py --time-performance-iterations 100 --update-perf --data-source SPY &&\
+	python src/evaluate_models.py --time-performance-iterations 100 --update-perf --data-source NDAQ
+
 evaluate_models:
 	python src/evaluate_models.py --time-performance-iterations 100 --data-source SPY &&\
 	python src/evaluate_models.py --time-performance-iterations 100 --data-source NDAQ

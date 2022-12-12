@@ -8,7 +8,9 @@ Created on Thu Nov 24 23:39:39 2022
 
 import argparse
 import timeit
-import tracemalloc
+import tracemalloc # TODO: figure out how we might automate memory analysis?
+import getpass
+
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -85,20 +87,30 @@ parser.add_argument(
     default=False,
     help='option to save plots of prices vs decisions'
 )
+parser.add_argument(
+    '--update-perf',
+    type=bool,
+    action=argparse.BooleanOptionalAction,
+    default=False,
+    help='option to update performance data CSV'
+)
 
 # - extract args
 args=parser.parse_args()
 time_perf_iter = args.time_performance_iterations
 include_plots = args.include_plots
 save_figs = args.save_figs
+update_perf = args.update_perf
 trend = spy if args.data_source == 'SPY' else ndaq
 # trend = ndaq
 
+
+# - establish models to compare
 omniscient_model = JHOmniscientMinMaxNdaq\
     if trend == ndaq\
     else JHOmniscientMinMax
 
-comp_models = [model_type.__name__ for model_type in [
+comp_models = [
     COVolumePriceAnd,
     GHBuyTheDip,
     JHLongHaul,
@@ -110,16 +122,17 @@ comp_models = [model_type.__name__ for model_type in [
     JHReactiveStdDev,
     # JHReactiveStdDev_tuned,
     MMbuytrendneg,
-]]
+]
+model_names = [model_type.__name__ for model_type in comp_models]
 
 
-def get_palette(cols=comp_models):
+def get_palette(cols=model_names):
     '''
     This is kind of a wonky function for consistently assigning colors to models.
     '''
     tab10 = get_tab10()
     per_col = {}
-    for i,col in enumerate(comp_models):
+    for i,col in enumerate(model_names):
         per_col[col] = tab10[i]
     return [per_col[col] for col in cols]
 
@@ -404,7 +417,7 @@ def plot_rank(
         results[:,[0,2,3]],
         columns=['Model', 'Net Value (USD)', 'Avg Time (ms)'],
     )
-    _df = _df[_df['Model'].isin(comp_models)]
+    _df = _df[_df['Model'].isin(model_names)]
     _df['const'] = 0
     
     if time_perf_iter:
@@ -486,29 +499,7 @@ def main():
     
     fin_comp_data = []
     results = []
-    for model_type in [
-            COVolumePriceAnd,
-            GHBuyCloseSellOpen,
-            GHBuyOpenSellClose,
-            GHBuyTheDip,
-            JHBandWagon,
-            JHLongHaul,
-            JHMinMax,
-            JHNormProb,
-            JHNormProb_tuned,
-            JHNormThresh,
-            JHNormThresh_tuned,
-            omniscient_model,
-            JHRandom,
-            JHRandomProp,
-            JHReactiveStdDev,
-            JHReactiveStdDev_tuned,
-            JHReverseMomentum,
-            JHReverseMomentum_tuned,
-            MMbuytrendneg,
-            MMbuytrendpos,
-    ]:
-        model_name = model_type.__name__
+    for (model_type, model_name) in zip(comp_models, model_names):
         # print(f'trying {model_name}')
         
         # measure time performance
@@ -532,7 +523,7 @@ def main():
             fin_perf,
             time_perf_ms,
         ])
-        if model_name in comp_models:
+        if model_name in model_names:
             fin_comp_data.append({
                 'name': model_name,
                 'data': model.net_values,
@@ -549,6 +540,47 @@ def main():
             )
     
     results = np.array(results)
+    
+    
+    # update the performance data CSV
+    if update_perf:
+        username = getpass.getuser()
+        perf_filename = 'data/perf.csv'
+        result_df = pd.read_csv(perf_filename)
+        
+        # remove prior entries for the current user/dataset/models
+        user_mask = result_df['username'] == username
+        dataset_mask = result_df['dataset'] == trend.name
+        model_mask = result_df['model'].isin(results[:,0])
+        others_df = result_df.drop(
+            result_df[user_mask & dataset_mask & model_mask].index,
+        )
+        
+        # create new df from current execution
+        column_shape = (results.shape[0], 1)
+        curr_df = pd.DataFrame(
+            np.concatenate(
+                [
+                    np.full(column_shape, trend.name),
+                    results[:,[0,2,3]],
+                    np.full(column_shape, time_perf_iter),
+                    np.full(column_shape, username),
+                ],
+                axis=1,
+            ),
+            columns=[
+                'dataset',
+                'model',
+                'financial_performance',
+                'time_performance',
+                'iterations',
+                'username',
+            ],
+        )
+        
+        # concatenate and save the updated DataFrame
+        result_df = pd.concat([others_df, curr_df])
+        result_df.to_csv(perf_filename, index=False)
     
     # plot performance comparisons
     if include_plots or save_figs:
