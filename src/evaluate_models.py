@@ -25,7 +25,7 @@ from util import spy, ndaq
 
 # models
 # TODO: find a way to simplify all these imports? seems like a lot
-from util.co_vol_and_price import COVolumePriceAnd
+from util.co_vol_and_price import COLowAndSlow
 from util.gh_buydip import GHBuyTheDip
 from util.gh_openclose import GHBuyOpenSellClose, GHBuyCloseSellOpen
 from util.jh_minmax import JHMinMax
@@ -33,18 +33,18 @@ from util.jh_norm_prob import JHNormProb,\
     JHNormProb_tuned,\
     JHNormThresh,\
     JHNormThresh_tuned
-from util.jh_refmodels import JHOmniscientMinMax,\
-    JHOmniscientMinMaxNdaq,\
-    JHRandom,\
-    JHRandomProp
 from util.jh_std_dev import JHReactiveStdDev, JHReactiveStdDev_tuned
 from util.jh_simple import \
     JHBandWagon,\
-    JHLongHaul,\
+    RefLongHaul,\
     JHReverseMomentum,\
     JHReverseMomentum_tuned
 from util.mm_buytrendneg import MMbuytrendneg
 from util.mm_buytrendpos import MMbuytrendpos
+from util.refmodels import RefOmniscientMinMax,\
+    RefOmniscientMinMaxNdaq,\
+    RefRandom,\
+    RefRandomProp
 
 
 # ----- constants
@@ -112,25 +112,25 @@ trend = load_data(args.data_source)
 # update_perf = True
 
 # - establish models to compare
-omniscient_model = JHOmniscientMinMaxNdaq\
+omniscient_model = RefOmniscientMinMaxNdaq\
     if trend == ndaq\
-    else JHOmniscientMinMax
+    else RefOmniscientMinMax
 
 comp_models = [
-    COVolumePriceAnd,
+    COLowAndSlow,
     GHBuyTheDip,
-    JHLongHaul,
     JHMinMax,
     # JHNormProb,
     # JHNormProb_tuned,
     # JHNormThresh,
     # JHNormThresh_tuned,
-    omniscient_model,
-    JHRandomProp,
     # JHReactiveStdDev,
     JHReactiveStdDev_tuned,
     # MMbuytrendpos,
     MMbuytrendneg,
+    RefLongHaul,
+    omniscient_model,
+    RefRandomProp,
 ]
 model_names = [model_type.__name__ for model_type in comp_models]
 

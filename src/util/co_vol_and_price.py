@@ -13,7 +13,7 @@ from util.model import Model, default_budget
 
 
 # Half-day momentum strategy
-class COVolumePriceAnd(Model):
+class COLowAndSlow(Model):
     def __init__(
             self,
             budget=default_budget,

@@ -20,7 +20,7 @@ class JHBandWagon(Model):
         return int(np.sign(snapshot[-1,0] - snapshot[-2,0]))
 
 # Buy and hold (using all budget available on day 1)
-class JHLongHaul(Model):
+class RefLongHaul(Model):
     def decide(self, snapshot):
         return int(self.balance//snapshot[-1,0])
 

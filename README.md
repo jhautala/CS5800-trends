@@ -23,20 +23,20 @@ All models are given the same fixed budget at the start of each simulation and t
 
 ### Reference Models
 
-* JHRandomProp: Randomly choose to buy, sell, or hold. When buying and selling, this model will buy or sell as much as it can at that time. This is a reference model, to give a sense of how each strategy compares to blind guesswork.
+* RefRandomProp: Randomly choose to buy, sell, or hold. When buying and selling, this model will buy or sell as much as it can at that time. This is a reference model, to give a sense of how each strategy compares to blind guesswork.
 
-<img src="figs/SPY_price_vs_decisions_JHRandomProp.png" width=900>
+<img src="figs/SPY_price_vs_decisions_RefRandomProp.png" width=900>
 
-* JHOmniscientMinMax: This is not strictly a valid model (also not truly greedy); it is a reference model that uses special knowledge to buy as many shares as possible at the global minimum and sell all of its shares at the global maximum.
+* RefOmniscientMinMax: This is not strictly a valid model (also not truly greedy); it is a reference model that uses special knowledge to buy as many shares as possible at the global minimum and sell all of its shares at the global maximum.
 So far it outperforms all our other models, so perhaps it is useful as a provisional upper bound on financial performance.
 
-<img src="figs/SPY_price_vs_decisions_JHOmniscientMinMax.png" width=900>
+<img src="figs/SPY_price_vs_decisions_RefOmniscientMinMax.png" width=900>
 
 ### A Priori Models
 
-* JHLongHaul - Buy as many shares a possible on the first iteration and never sell.
+* RefLongHaul - Buy as many shares a possible on the first iteration and never sell.
 
-<img src="figs/SPY_price_vs_decisions_JHLongHaul.png" width=900>
+<img src="figs/SPY_price_vs_decisions_RefLongHaul.png" width=900>
 
 * GHBuyOpenSellClose - Buy as many shares as possible each morning and sell all each evening.
 
@@ -48,10 +48,10 @@ So far it outperforms all our other models, so perhaps it is useful as a provisi
 
 ### Reactive Models
 
-* COVolumePriceAnd - This is like a "Reverse Momentum" model, but it incorporates "Volume" and only trades at close.
+* COLowAndSlow - This is like a "Reverse Momentum" model, but it incorporates "Volume" and only trades at close.
 It's essentially a "low and slow" kind of model ("low" meaning current price is lower than the previous close; "slow" meaning it only trades if the volume is also lower).
 
-<img src="figs/SPY_price_vs_decisions_COVolumePriceAnd.png" width=900>
+<img src="figs/SPY_price_vs_decisions_COLowAndSlow.png" width=900>
 
 * GHBuyTheDip - This is a "Reverse Momentum" model, using a ten point lag:
   * If the current price is lower than the price nine points previously, buy a share
@@ -76,7 +76,7 @@ If the current price is lower than the price two days prior, then it buys as muc
 
 For a detailed description of initial investigation into summary statistics and sliding windows, see [variance models](variance.md).
 
-* JHMinMax: This is based on the JHOmniscientMinMax model, but uses a rolling min/max over the previous 728 points (about a year) of historic data.
+* JHMinMax: This is based on the RefOmniscientMinMax model, but uses a rolling min/max over the previous 728 points (about a year) of historic data.
 
 <img src="figs/SPY_price_vs_decisions_JHMinMax.png" width=900>
 
