@@ -104,7 +104,7 @@ class JHStdDevDetail(Model):
         if self.count > 1:
             # calculate std dev
             self.sd = np.sqrt(
-                self.sumSq/(self.count-1) - self.count*self.mu**2/(self.count)
+                (self.sumSq - self.count*self.mu**2)/(self.count-1)
             )
             self.sds.append(self.sd)
             
@@ -134,7 +134,8 @@ class JHStdDevDetail(Model):
                     else:
                         x = self.balance/price
                 else:
-                    x = -int(sd_diff * self.scale * self.balance)
+                    spend = sd_diff * self.scale * self.balance
+                    x = -int(spend//price)
             elif self.mode == 'normprob': # prob
                 # TODO: try different distributions (other than normal)?
                 #       change shape of curve to be flatter near zero

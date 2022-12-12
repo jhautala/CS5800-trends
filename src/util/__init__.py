@@ -1,1 +1,1 @@
-from .data import Trendspy = Trend('SPY')ndaq = Trend('NDAQ')
+from .data import load_dataspy = load_data('SPY')ndaq = load_data('NDAQ')

@@ -17,7 +17,7 @@ All models are given the same fixed budget at the start of each simulation and t
 
 ## Models
 
-<img src="figs/SPY_financial_comparison_7_models.png" width=900>
+<img src="figs/SPY_financial_comparison_8_models.png" width=900>
 
 <img src="figs/SPY_model_rankings.png" width=900>
 
@@ -27,7 +27,8 @@ All models are given the same fixed budget at the start of each simulation and t
 
 <img src="figs/SPY_price_vs_decisions_JHRandomProp.png" width=900>
 
-* JHOmniscientMinMax: This is not strictly a valid model (also not truly greedy); it is a refernece model that uses special knowledge to buy as many shares as possible at the global minimum and sell all of its shares at the global maximum. So far it outperforms all our other models, so perhaps it is useful as a provisional upper bound on financial performance.
+* JHOmniscientMinMax: This is not strictly a valid model (also not truly greedy); it is a reference model that uses special knowledge to buy as many shares as possible at the global minimum and sell all of its shares at the global maximum.
+So far it outperforms all our other models, so perhaps it is useful as a provisional upper bound on financial performance.
 
 <img src="figs/SPY_price_vs_decisions_JHOmniscientMinMax.png" width=900>
 
@@ -47,6 +48,18 @@ All models are given the same fixed budget at the start of each simulation and t
 
 ### Reactive Models
 
+* COVolumePriceAnd - This is like a "Reverse Momentum" model, but it incorporates "Volume" and only trades at close.
+It's essentially a "low and slow" kind of model ("low" meaning current price is lower than the previous close; "slow" meaning it only trades if the volume is also lower).
+
+<img src="figs/SPY_price_vs_decisions_COVolumePriceAnd.png" width=900>
+
+* GHBuyTheDip - This is a "Reverse Momentum" model, using a ten point lag:
+  * If the current price is lower than the price nine points previously, buy a share
+  * If it's higher, sell a share
+  * If it's equal it will do nothing
+
+<img src="figs/SPY_price_vs_decisions_GHBuyTheDip.png" width=900>
+
 * JHBandWagon - This is a "Momentum" based model, based on the last two points:
   * Buy one share if the current price is greater than the previous
   * Sell one if less
@@ -54,19 +67,10 @@ All models are given the same fixed budget at the start of each simulation and t
 
 <img src="figs/SPY_price_vs_decisions_JHBandWagon.png" width=900>
 
-* JHReverseMomentum - This is an immediate "Reverse Momentum" model (i.e. the opposite of the JHBandWagon model):
-  * Buy if current price is less than previous
-  * Sell if current is greater than previous
-  * Do nothing if last two prices are equal
+* MMbuytrendneg - This is a "Reverse Momentum" model that only trades on opens.
+If the current price is lower than the price two days prior, then it buys as much as it can and sells it again in the same day.
 
-<img src="figs/SPY_price_vs_decisions_JHReverseMomentum.png" width=900>
-
-* GHBuyTheDip - This is another "Reverse Momentum" model, using a ten point lag:
-  * If the current price is lower than the price nine points previously, buy a share
-  * If it's higher, sell a share
-  * If it's equal it will do nothing
-
-<img src="figs/SPY_price_vs_decisions_GHBuyTheDip.png" width=900>
+<img src="figs/SPY_price_vs_decisions_MMbuytrendneg.png" width=900>
 
 ### Statistical Models
 
@@ -75,6 +79,12 @@ For a detailed description of initial investigation into summary statistics and 
 * JHMinMax: This is based on the JHOmniscientMinMax model, but uses a rolling min/max over the previous 728 points (about a year) of historic data.
 
 <img src="figs/SPY_price_vs_decisions_JHMinMax.png" width=900>
+
+* JHReactiveStdDev: This is based on the JHReverseMomentum model, but it scales the quantity to buy based on the rolling statistics.
+The decision to buy is proportional to standard deviations from mean and cash on hand (e.g. spending all available cash if the current price is <= mean - 1 std dev, etc.).
+This model is fairly simple and seems like it might generalize fairly well, at least for indexed funds, since it does well on our validation dataset "NDAQ".
+
+<img src="figs/SPY_price_vs_decisions_JHReactiveStdDev.png" width=900>
 
 ### "Tuned" Models
 
@@ -86,4 +96,9 @@ First we scaled to our current available cash/shares (i.e. `scale=1`).
 * By brute force we determined that, for this data set and initial budget of $10,000, the optimal number of shares was 18, yielding ~43% net value USD over ~3.5 years.
 
 <img src="figs/SPY_price_vs_decisions_JHReverseMomentum_tuned.png" width=900>
+
+* JHReactiveStdDev_tuned: This is based on the JHReactiveStdDev model, with an additional `scale` parameter that is the proportion of cash per standard deviation.
+Interestingly, this model was tuned on the "SPY" data (where it performs well) but actually beats the omniscient reference model for the validation data "NDAQ".
+
+<img src="figs/SPY_price_vs_decisions_JHReactiveStdDev_tuned.png" width=900>
 

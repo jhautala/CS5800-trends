@@ -20,6 +20,7 @@ plt.ioff() # disable interactive plotting
 
 # internal
 from util.model import default_budget
+from util.data import load_data
 from util import spy, ndaq
 
 # models
@@ -101,7 +102,7 @@ time_perf_iter = args.time_performance_iterations
 include_plots = args.include_plots
 save_figs = args.save_figs
 update_perf = args.update_perf
-trend = spy if args.data_source == 'SPY' else ndaq
+trend = load_data(args.data_source)
 
 # TODO delete these argument override
 # trend = ndaq
@@ -126,8 +127,9 @@ comp_models = [
     # JHNormThresh_tuned,
     omniscient_model,
     JHRandomProp,
-    JHReactiveStdDev,
-    # JHReactiveStdDev_tuned,
+    # JHReactiveStdDev,
+    JHReactiveStdDev_tuned,
+    # MMbuytrendpos,
     MMbuytrendneg,
 ]
 model_names = [model_type.__name__ for model_type in comp_models]

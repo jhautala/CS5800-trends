@@ -9,6 +9,7 @@ Created on Wed Nov 23 19:10:28 2022
 import pandas as pd
 import numpy as np
 
+_per_name = {}
 class Trend():
     def __init__(self, name='SPY'):
         self.name = name
@@ -68,3 +69,11 @@ class Trend():
             columns=['Price', 'Volume'],
             index=_dates,
         )
+
+def load_data(name, skip_cache=False):
+    if name in _per_name and not skip_cache:
+        return _per_name.get(name)
+    
+    trend = Trend(name)
+    _per_name[name] = trend
+    return trend

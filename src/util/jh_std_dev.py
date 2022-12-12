@@ -55,13 +55,14 @@ class JHReactiveStdDev(Model):
         if self.count > 1:
             # calculate std dev
             self.sd = np.sqrt(
-                self.sumSq/(self.count-1) - self.count*self.mu**2/(self.count-1)
+                (self.sumSq - self.count*self.mu**2)/(self.count-1)
             )
             
             # calculate num std devs from prior point
             sd_diff = (snapshot[-1,0] - snapshot[-2,0])/self.sd
+            spend = sd_diff * self.scale * self.balance
             
-            x = -int(sd_diff * self.scale * self.balance)
+            x = -int(spend//price)
         else:
             # not enough information to make a decision yet
             x = 0
@@ -103,6 +104,6 @@ class JHReactiveStdDev_tuned(JHReactiveStdDev):
     ):
         super().__init__(
             budget,
-            scale=0.683734,
+            scale=158.33333333,
             window=window,
         )

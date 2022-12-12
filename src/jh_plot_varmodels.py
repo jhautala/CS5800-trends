@@ -192,7 +192,7 @@ def plot(
         )
     plt.show()
 
-def run_model(trend, model, desc, save_fig=False):
+def run_model(trend, model, desc=None, save_fig=False):
     for i in range(1, trend.two_dim.shape[0]+1):
         model.evaluate(trend.two_dim[:i,:].copy())
     print(f'financial performance: {model.get_net_value()}')
@@ -238,6 +238,14 @@ def main():
     model = JHStdDevDetail(mode='minmax', window=728, conserve=True)
     run_model(trend, 'minmax', model, save_fig=save_fig)
     
+    
+    # model = JHStdDevDetail(
+    #     scale=158.33333333,
+    # )
+    # for i in range(1, trend.two_dim.shape[0]+1):
+    #     model.evaluate(trend.two_dim[:i,:].copy())
+    # net_value = model.get_net_value()
+    
     # for i in range(1, trend.two_dim.shape[0]+1):
     #     model.evaluate(trend.two_dim[:i,:].copy())
     # plot('sd_diffs', model, alt='sigma_mus', save_fig=save_fig)
@@ -280,7 +288,9 @@ def main():
     # plt.scatter(x=results[:,0], y=results[:,1])
     # plt.title(f'{type(model)}')
     # plt.show()
-    results = scan(spy, JHNormProb, { 'scale': np.linspace(.24, .25, 100)})
+    
+    # ----- new way
+    # results = scan(spy, JHNormProb, { 'scale': np.linspace(.24, .25, 100)})
     
     # # ----- find best params for JHNormThresh
     # results = []

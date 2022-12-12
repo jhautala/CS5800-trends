@@ -33,6 +33,7 @@ def scan(trend, model_type, grid):
         A DataFrame containing all the results across all combinations of parameter values.
 
     '''
+    print(f'Scanning {model_type.__name__} on {trend.name}')
     items = sorted(grid.items())
     keys, values = zip(*items)
     results = []
@@ -48,13 +49,23 @@ def scan(trend, model_type, grid):
         results.append(result)
     results = np.array(results)
     argmax = np.argmax(results[:,0])
-    print(f'{argmax}: {", ".join(params.keys())}={results[argmax,1:]} -> {results[argmax,0]}')
     
+    # text output
+    print(f'Best financial performance: {results[argmax,0]}')
+    best_params = '\n\t'.join([f'{k}={v}'
+        for k, v in zip(params.keys(), results[argmax,1:])
+    ])
+    print(f'Best params:\n\t{best_params},')
+    
+    # pyplot
     if len(keys) == 1:
         plt.scatter(x=results[:,1], y=results[:,0])
-        plt.title(f'{type(model).__name__} per {keys[0]}')
+        plt.title(f'{type(model).__name__} per "{keys[0]}" on {trend.name}')
         plt.xlabel(f'{keys[0]}')
         plt.ylabel('Net Value (USD)')
         plt.show()
     
-    return pd.DataFrame(results, columns=['net_value', *keys])
+    # pandas
+    df = pd.DataFrame(results, columns=['net_value', *keys])
+    df['dataset'] = trend.name
+    return df
