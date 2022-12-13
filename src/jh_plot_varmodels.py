@@ -216,6 +216,29 @@ def main():
     trend = ndaq
     trend = spy
     
+    # # ----- test inverse trend
+    # dd = trend.two_dim
+    # maxs = np.array([dd[:,0].max(), dd[:,1].max()]).reshape((1,2))+1
+    # dd = maxs - dd
+    # # model = JHStdDevDetail(scale=68.6, conserve=True)
+    # # for i in range(1, dd.shape[0]+1):
+    # #     model.evaluate(dd[:i,:].copy())
+    # # model.get_net_value()
+    # plt.plot(dd)
+    # plt.show()
+    
+    # ----- look into why asymmetric
+    # model = JHStdDevDetail(scale=68.6, conserve=True)
+    # for i in range(1, trend.two_dim.shape[0]+1):
+    #     model.evaluate(trend.two_dim[:i,:].copy())
+    # model.get_net_value()
+    # diffs = np.array(model.held) - np.array(model.can_buy)
+    # plt.plot(model.can_buy)
+    # plt.plot(model.held)
+    # plt.plot(diffs)
+    # plt.xlim(0,300)
+    # plt.show()
+    
     model = JHReactiveStdDev()
     run_model(trend, model, save_fig=save_fig)
     

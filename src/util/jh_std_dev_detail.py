@@ -3,6 +3,10 @@
 """
 Created on Fri Nov 25 00:46:00 2022
 
+TODO: incorporate Welford's method:
+    https://jonisalonen.com/2014/efficient-and-accurate-rolling-standard-deviation/
+    https://jonisalonen.com/2013/deriving-welfords-method-for-computing-variance/
+
 @author: jhautala
 """
 
@@ -53,6 +57,8 @@ class JHStdDevDetail(Model):
         self.sigma_mus = []
         self.overs = []
         self.overshares = []
+        self.held = []
+        self.can_buy = []
     
     def decide(self, snapshot):
         price = snapshot[-1,0]
@@ -102,6 +108,9 @@ class JHStdDevDetail(Model):
         self.mu = self.sum/self.count
         self.mus.append(self.mu)
         if self.count > 1:
+            self.held.append(self.shares)
+            self.can_buy.append(self.balance//price)
+            
             # calculate std dev
             self.sd = np.sqrt(
                 (self.sumSq - self.count*self.mu**2)/(self.count-1)

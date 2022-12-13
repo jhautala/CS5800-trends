@@ -60,8 +60,8 @@ class JHReactiveStdDev(Model):
             
             # calculate num std devs from prior point
             sd_diff = (snapshot[-1,0] - snapshot[-2,0])/self.sd
-            spend = sd_diff * self.scale * self.balance
-            x = -int(spend//price)
+            spend = -sd_diff * self.scale * self.balance
+            x = int(spend//price)
             
             # NOTE: this is what I actually meant to do, but
             #       I accidentally found a better model, by
