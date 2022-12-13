@@ -134,7 +134,6 @@ comp_models = [
 ]
 model_names = [model_type.__name__ for model_type in comp_models]
 
-
 def get_palette(cols=model_names):
     '''
     This is kind of a wonky function for consistently assigning colors to models.
@@ -337,7 +336,6 @@ def plot_comp(
     # NOTE: e.g. to convert timestamp to numeric for linreg
     # fin_comp_df['time'] = fin_comp_df['time'].apply(lambda x: x.value)
     
-    market_color = 'black'
     fig, [ax1, ax2] = plt.subplots(
         nrows=2,
         ncols=1,
@@ -379,27 +377,76 @@ def plot_comp(
     #         ),
     #     )
     
-    # TODO: delete this; it's not fast nor particularly readable...
-    if incl_sds:
-        deltas = np.diff(trend.one_dim)
-        for i, delta_sds in enumerate(deltas / trend.one_dim.std()):
-            color = 'tab:blue' if delta_sds > 0 else 'tab:orange'
-            [time1, time2] = trend.df_w_dates.index.values[i:i+2]
-            ax2.axvspan(
-                time1,
-                time2,
-                color=color,
-                alpha=abs(np.clip(delta_sds * 2, -1, 1))
-            )
-    ax2.plot(
+    # # TODO: delete this; it's not fast nor particularly readable...
+    # if incl_sds:
+    #     deltas = np.diff(trend.one_dim)
+    #     for i, delta_sds in enumerate(deltas / trend.one_dim.std()):
+    #         color = 'tab:blue' if delta_sds > 0 else 'tab:orange'
+    #         [time1, time2] = trend.df_w_dates.index.values[i:i+2]
+    #         ax2.axvspan(
+    #             time1,
+    #             time2,
+    #             color=color,
+    #             alpha=abs(np.clip(delta_sds * 2, -1, 1))
+    #         )
+    
+    price_color = 'tab:blue'
+    price_label = f'{trend.name} Price (USD)'
+    price_line = ax2.plot(
         trend.df_w_dates.index.values,
         trend.one_dim,
-        color=market_color,
+        color=price_color,
+        # alpha=.5,
+        label=price_label,
     )
     ax2.set_xlabel('Time')
-    ax2.set_ylabel(f'{trend.name} Price (USD)')
+    ax2.set_ylabel(price_label)
+    ax2.spines['left'].set_color(price_color)
+    ax2.yaxis.label.set_color(price_color)
+    ax2.tick_params(
+        axis='y',
+        which='both',
+        color=price_color,
+        labelcolor=price_color,
+    )
+    
+    # plot volume
+    tmp = trend.two_dim[:,1]
+    tmp = tmp[~np.isnan(tmp)]
+    vols = np.empty(trend.one_dim.shape, dtype=trend.one_dim.dtype)
+    vols[0::2] = tmp
+    vols[1::2] = tmp
+    
+    volume_color = 'tab:gray'
+    volume_label = f'{trend.name} Volume (USD)'
+    ax3 = ax2.twinx()
+    volume_line = ax3.plot(
+        trend.df_w_dates.index.values,
+        vols,
+        color=volume_color,
+        alpha=.5,
+        label=volume_label,
+    )
+    ax3.set_ylabel(volume_label)
+    ax3.spines['right'].set_color(volume_color)
+    ax3.yaxis.label.set_color(volume_color)
+    ax3.tick_params(
+        axis='y',
+        which='both',
+        color=volume_color,
+        labelcolor=volume_color,
+    )
+    (ylim_0, ylim_1) = ax3.get_ylim()
+    ax3.set_ylim(ylim_0, ylim_0 + (ylim_1 - ylim_0) * 1.07)
+    
+    plt.legend(
+        [*price_line, *volume_line],
+        (price_label, volume_label),
+        # bbox_to_anchor=(.1, 1),
+        loc='upper left',
+        # borderaxespad=0.,
+    )
     fig.suptitle(f'Financial Performance on {trend.name} - {len(fin_comp_data)} Models')
-    plt.tight_layout()
     plt.tight_layout()
     if save_fig:
         plt.savefig(

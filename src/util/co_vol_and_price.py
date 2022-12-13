@@ -40,3 +40,35 @@ class COLowAndSlow(Model):
             return self.balance//currPrice
         else:
             return 0;
+
+class COVolumeAndPrice(Model):
+    def __init__(
+            self,
+            budget=default_budget,
+            buy_low=True,
+            buy_slow=True,
+    ):
+        super().__init__(budget)
+        self.buy_low = 1 if buy_low else -1
+        self.buy_slow = 1 if buy_slow else -1
+    
+    def decide(self, snapshot):
+        # make sure we have enough data
+        if snapshot.shape[0] < 4:
+            return 0
+        
+        # make sure this is a close time
+        curr_open = snapshot.shape[0] % 2
+        if curr_open:
+            return 0
+        
+        [currPrice, currVolume] = snapshot[-1,:]
+        [prevPrice, prevVolume] = snapshot[-3,:]
+        priceDir = self.buy_low * np.sign(currPrice - prevPrice)
+        volumeDir = self.buy_slow * np.sign(currVolume - prevVolume)
+        if priceDir > 0 and volumeDir > 0:
+            return -self.shares
+        elif priceDir < 0 and volumeDir < 0:
+            return self.balance//currPrice
+        else:
+            return 0;
