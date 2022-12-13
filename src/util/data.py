@@ -9,7 +9,13 @@ Created on Wed Nov 23 19:10:28 2022
 import pandas as pd
 import numpy as np
 
-_per_name = {}
+
+# ----- constants
+perf_filename = 'data/perf.csv'
+_per_name = {} # a cache of loaded trends
+
+
+# ----- classes
 class Trend():
     def __init__(self, name='SPY'):
         self.name = name
