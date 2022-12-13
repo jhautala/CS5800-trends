@@ -242,24 +242,35 @@ def main():
     model = JHReactiveStdDev()
     run_model(trend, model, save_fig=save_fig)
     
-    model = JHStdDevDetail(scale=68.6, conserve=True)
-    run_model(trend, 'sd_diffs_conserve', model, save_fig=save_fig)
+    model = JHStdDevDetail(scale=158.33333333, conserve=True)
+    run_model(trend, model, 'sd_diffs_conserve', save_fig=save_fig)
     
     model = JHStdDevDetail(mode='normprob')
-    run_model(trend, 'norm', model, save_fig=save_fig)
+    run_model(trend, model, 'norm', save_fig=save_fig)
     
     model = JHStdDevDetail(mode='normprob', scale=1.496)
-    run_model(trend, 'norm_cheat', model, save_fig=save_fig)
+    run_model(trend, model, 'norm_cheat', save_fig=save_fig)
     
     model = JHStdDevDetail(mode='normprob', scale='max')
-    run_model(trend, 'norm_minmax', model, save_fig=save_fig)
+    run_model(trend, model, 'norm_minmax', save_fig=save_fig)
     
     # ----- try minmax with 1-year window
     model = JHStdDevDetail(mode='minmax', window=728)
-    run_model(trend, 'minmax', model, save_fig=save_fig)
+    run_model(trend, model, 'minmax', save_fig=save_fig)
     
     model = JHStdDevDetail(mode='minmax', window=728, conserve=True)
-    run_model(trend, 'minmax', model, save_fig=save_fig)
+    run_model(trend, model, 'minmax', save_fig=save_fig)
+    
+    # vv = []
+    # m = JHStdDevDetail()
+    # for i in range(1, trend.two_dim.shape[0]+1):
+    #     m.evaluate(trend.two_dim[:i,:].copy())
+    # vv.append(m.mus)
+    # mus = np.array(vv)
+    # diffs = mus[0,:] - mus[1,:]
+    # diffs.mean()
+    # plt.plot(diffs)
+    # plt.show()
     
     
     # model = JHStdDevDetail(
