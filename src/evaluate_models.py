@@ -20,7 +20,7 @@ plt.ioff() # disable interactive plotting
 
 # internal
 from util.model import default_budget
-from util.data import load_data
+from util.data import load_data, perf_filename
 from util import spy, ndaq
 
 # models
@@ -436,6 +436,9 @@ def plot_comp(
         color=volume_color,
         labelcolor=volume_color,
     )
+    
+    # NOTE: This is a hack to prevent the legend occluding the Volume trend
+    #       for SPY. We add 7% to the upper bound of the y-axis.
     (ylim_0, ylim_1) = ax3.get_ylim()
     ax3.set_ylim(ylim_0, ylim_0 + (ylim_1 - ylim_0) * 1.07)
     
@@ -592,7 +595,6 @@ def main():
     # update the performance data CSV
     if update_perf:
         username = getpass.getuser()
-        perf_filename = 'data/perf.csv'
         result_df = pd.read_csv(perf_filename)
         
         # remove prior entries for the current user/dataset/models

@@ -3,6 +3,9 @@
 """
 Created on Fri Dec  2 19:39:06 2022
 
+NOTE: This is a super-hacky playground for spot checking models, particularly
+    the stts that feed variance-based models.
+
 @author: jhautala
 """
 
