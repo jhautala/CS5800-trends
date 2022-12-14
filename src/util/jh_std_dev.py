@@ -61,12 +61,14 @@ class JHReactiveStdDev(Model):
             # calculate num std devs from prior point
             sd_diff = (snapshot[-1,0] - snapshot[-2,0])/self.sd
             
+            # decide how much to buy/sell
             spend = -sd_diff * self.scale * self.balance
             x = int(spend//price)
             
             # NOTE: this was my original intent, but it actually
             #       doesn't provide as much ROI as just scaling by
             #       how many shares we can currently afford...
+            #       (the accidentally asymmetric model is better)
             # if sd_diff < 0:
             #     spend = -sd_diff * self.scale * self.balance
             #     x = int(spend//price)
@@ -117,5 +119,17 @@ class JHReactiveStdDev_tuned(JHReactiveStdDev):
         super().__init__(
             budget,
             scale=158.33333333,
+            window=window,
+        )
+
+class JHReactiveStdDev_ndaq(JHReactiveStdDev):
+    def __init__(
+            self,
+            budget=default_budget,
+            window=100,
+    ):
+        super().__init__(
+            budget,
+            scale=76.24624624624624,
             window=window,
         )

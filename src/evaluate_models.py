@@ -26,7 +26,7 @@ from util import spy, ndaq
 # models
 # TODO: find a way to simplify all these imports? seems like a lot
 from util.co_vol_and_price import COLowAndSlow
-from util.gh_buydip import GHBuyTheDip
+from util.gh_buydip import GHBuyTheDip, GHBuyTheDip2
 from util.gh_openclose import GHBuyOpenSellClose, GHBuyCloseSellOpen
 from util.jh_minmax import JHMinMax
 from util.jh_norm_prob import JHNormProb,\
@@ -122,6 +122,7 @@ comp_models = [
     RefRandomProp,
     COLowAndSlow,
     GHBuyTheDip,
+    # GHBuyTheDip2,
     JHMinMax,
     # JHNormProb,
     # JHNormProb_tuned,

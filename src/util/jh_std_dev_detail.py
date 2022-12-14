@@ -3,6 +3,10 @@
 """
 Created on Fri Nov 25 00:46:00 2022
 
+TODO: incorporate Welford's method:
+    https://jonisalonen.com/2014/efficient-and-accurate-rolling-standard-deviation/
+    https://jonisalonen.com/2013/deriving-welfords-method-for-computing-variance/
+
 @author: jhautala
 """
 
@@ -22,6 +26,7 @@ class JHStdDevDetail(Model):
             scale=1,
             window=100,
             conserve=False,
+            welford=False,
     ):
         super().__init__(budget)
         self.window = window
@@ -33,7 +38,8 @@ class JHStdDevDetail(Model):
         self.sum = 0
         self.sumSq = 0
         self.count = 0
-        self.mu = None
+        self.sqDiff = 0
+        self.mu = 0
         self.sd = None
         self.num_bought = 0
         self.tot_cost = 0
@@ -53,6 +59,8 @@ class JHStdDevDetail(Model):
         self.sigma_mus = []
         self.overs = []
         self.overshares = []
+        self.held = []
+        self.can_buy = []
     
     def decide(self, snapshot):
         price = snapshot[-1,0]
@@ -62,16 +70,33 @@ class JHStdDevDetail(Model):
         self.sum += price
         self.sumSq += price ** 2
         self.count += 1
+        if self.welford:
+            # calculate mean and increment running difference
+            priorMu = self.mu
+            self.mu += (price - self.mu)/self.count
+            self.sqDiff += (price - self.mu)*(price - priorMu)
         
         if self.window is not None:
             # apply window
             if self.count > self.window:
-                self.sum -= snapshot[-self.count,0]
-                self.sumSq -= snapshot[-self.count,0]**2
+                leaving = snapshot.shape[0] - self.window - 1
+                if self.welford:
+                    leavingN = min(self.window, leaving+1)
+                    leavingPrice = snapshot[leaving,0]
+                    leavingMu = self.mus[leaving]
+                    leavingPriorMu = self.mus[
+                        0 if leaving == 0 else snapshot[leaving-1, 0]
+                    ]
+                    leavingDiff = leavingPrice - leavingMu
+                    self.mu -= leavingDiff/leavingN
+                    self.sqDiff -= leavingDiff * (leavingPrice - leavingPriorMu)
+                else:
+                    self.sum -= snapshot[-self.count,0]
+                    self.sumSq -= snapshot[-self.count,0]**2
+                
                 self.count -= 1
                 
                 # check to see if min or max is leaving the window
-                leaving = snapshot.shape[0] - self.window - 1
                 if snapshot[leaving,0] == self.min:
                     self.min = None
                 if snapshot[leaving,0] == self.max:
@@ -98,14 +123,22 @@ class JHStdDevDetail(Model):
         self.mins.append(self.min)
         self.maxs.append(self.max)
         
-        # calculate mean
-        self.mu = self.sum/self.count
+        if not self.welford:
+            # calculate mean
+            self.mu = self.sum/self.count
+
         self.mus.append(self.mu)
         if self.count > 1:
+            self.held.append(self.shares)
+            self.can_buy.append(self.balance//price)
+            
             # calculate std dev
-            self.sd = np.sqrt(
-                (self.sumSq - self.count*self.mu**2)/(self.count-1)
-            )
+            if self.welford:
+                self.sd = self.sqDiff/(self.count - 1)
+            else:
+                self.sd = np.sqrt(
+                    (self.sumSq - self.count*self.mu**2)/(self.count-1)
+                )
             self.sds.append(self.sd)
             
             # calculate z score
@@ -134,8 +167,11 @@ class JHStdDevDetail(Model):
                     else:
                         x = self.balance/price
                 else:
-                    spend = sd_diff * self.scale * self.balance
-                    x = -int(spend//price)
+                    # NOTE: original intent was to scale sells to held shares
+                    #       but scaling to how many we can afford actually
+                    #       performs better...
+                    spend = -sd_diff * self.scale * self.balance
+                    x = int(spend//price)
             elif self.mode == 'normprob': # prob
                 # TODO: try different distributions (other than normal)?
                 #       change shape of curve to be flatter near zero

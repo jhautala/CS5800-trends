@@ -219,27 +219,61 @@ def main():
     trend = ndaq
     trend = spy
     
+    # # ----- test inverse trend
+    # dd = trend.two_dim
+    # maxs = np.array([dd[:,0].max(), dd[:,1].max()]).reshape((1,2))+1
+    # dd = maxs - dd
+    # # model = JHStdDevDetail(scale=68.6, conserve=True)
+    # # for i in range(1, dd.shape[0]+1):
+    # #     model.evaluate(dd[:i,:].copy())
+    # # model.get_net_value()
+    # plt.plot(dd)
+    # plt.show()
+    
+    # ----- look into why asymmetric
+    # model = JHStdDevDetail(scale=68.6, conserve=True)
+    # for i in range(1, trend.two_dim.shape[0]+1):
+    #     model.evaluate(trend.two_dim[:i,:].copy())
+    # model.get_net_value()
+    # diffs = np.array(model.held) - np.array(model.can_buy)
+    # plt.plot(model.can_buy)
+    # plt.plot(model.held)
+    # plt.plot(diffs)
+    # plt.xlim(0,300)
+    # plt.show()
+    
     model = JHReactiveStdDev()
     run_model(trend, model, save_fig=save_fig)
     
-    model = JHStdDevDetail(scale=68.6, conserve=True)
-    run_model(trend, 'sd_diffs_conserve', model, save_fig=save_fig)
+    model = JHStdDevDetail(scale=158.33333333, conserve=True)
+    run_model(trend, model, 'sd_diffs_conserve', save_fig=save_fig)
     
     model = JHStdDevDetail(mode='normprob')
-    run_model(trend, 'norm', model, save_fig=save_fig)
+    run_model(trend, model, 'norm', save_fig=save_fig)
     
     model = JHStdDevDetail(mode='normprob', scale=1.496)
-    run_model(trend, 'norm_cheat', model, save_fig=save_fig)
+    run_model(trend, model, 'norm_cheat', save_fig=save_fig)
     
     model = JHStdDevDetail(mode='normprob', scale='max')
-    run_model(trend, 'norm_minmax', model, save_fig=save_fig)
+    run_model(trend, model, 'norm_minmax', save_fig=save_fig)
     
     # ----- try minmax with 1-year window
     model = JHStdDevDetail(mode='minmax', window=728)
-    run_model(trend, 'minmax', model, save_fig=save_fig)
+    run_model(trend, model, 'minmax', save_fig=save_fig)
     
     model = JHStdDevDetail(mode='minmax', window=728, conserve=True)
-    run_model(trend, 'minmax', model, save_fig=save_fig)
+    run_model(trend, model, 'minmax', save_fig=save_fig)
+    
+    # vv = []
+    # m = JHStdDevDetail()
+    # for i in range(1, trend.two_dim.shape[0]+1):
+    #     m.evaluate(trend.two_dim[:i,:].copy())
+    # vv.append(m.mus)
+    # mus = np.array(vv)
+    # diffs = mus[0,:] - mus[1,:]
+    # diffs.mean()
+    # plt.plot(diffs)
+    # plt.show()
     
     
     # model = JHStdDevDetail(
