@@ -60,9 +60,21 @@ class JHReactiveStdDev(Model):
             
             # calculate num std devs from prior point
             sd_diff = (snapshot[-1,0] - snapshot[-2,0])/self.sd
-            spend = sd_diff * self.scale * self.balance
             
-            x = -int(spend//price)
+            spend = -sd_diff * self.scale * self.balance
+            x = int(spend//price)
+            
+            # NOTE: this was my original intent, but it actually
+            #       doesn't provide as much ROI as just scaling by
+            #       how many shares we can currently afford...
+            # if sd_diff < 0:
+            #     spend = -sd_diff * self.scale * self.balance
+            #     x = int(spend//price)
+            # elif sd_diff > 0:
+            #     liquidate = sd_diff * self.scale * self.shares
+            #     x = -liquidate
+            # else:
+            #     x = 0
         else:
             # not enough information to make a decision yet
             x = 0
