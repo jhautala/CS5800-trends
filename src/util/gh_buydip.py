@@ -32,10 +32,14 @@ class GHBuyTheDip2(Model):
             return 0
         price = snapshot[-1,0]
         direction = np.sign(price - snapshot[-10,0])
+        
+        # check for 'shares_per' mode
         if self.shares_per is not None:
             return -direction * self.shares_per
+        
+        # apply proportional to held
         if direction > 0:
-            return self.shares * self.prop
+            return -self.shares * self.prop
         elif direction < 0:
             return (self.balance*self.prop)//price
         else:
