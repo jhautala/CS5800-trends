@@ -10,9 +10,9 @@ import pandas as pd
 
 from util.data import perf_filename
 
-result_df = pd.read_csv(perf_filename)
-spy_df = result_df[result_df['dataset'] == 'SPY']
-for mn in [
+
+# ----- config/constants
+model_names = [
         'RefLongHaul',
         'RefRandomProp',
         'RefOmniscientMinMax',
@@ -22,15 +22,24 @@ for mn in [
         'JHReactiveStdDev',
         'JHReactiveStdDev_tuned',
         'JHMinMax',
-]:
-    row = []
+]
+usernames = [
+        'greg',
+        'jhautala',
+        'maxwellmacavoy',
+        'Collins',
+]
+dataset = 'SPY'
+
+
+# ----- main execution
+result_df = pd.read_csv(perf_filename)
+spy_df = result_df[result_df['dataset'] == dataset]
+print('\t' + '\t'.join([*usernames, 'average']))
+for mn in model_names:
+    row = [mn]
     mm = spy_df['model'] == mn
-    for un in [
-            'greg',
-            'jhautala',
-            'maxwellmacavoy',
-            'Collins',
-    ]:
+    for un in usernames:
         um = spy_df['username'] == un
         r = spy_df[mm & um]['time_performance'].values
         if len(r):
